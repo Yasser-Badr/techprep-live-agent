@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechPrep Live Agent</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #1e1e1e; color: white; margin: 0; padding: 20px; }
+        h1 { color: #4CAF50; margin-bottom: 5px; }
+        .container { max-width: 800px; margin: auto; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; margin-top: 30px;}
+        button { padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; border-radius: 6px; transition: 0.3s; }
+        #startBtn { background-color: #4CAF50; color: white; }
+        #startBtn:hover { background-color: #45a049; }
+        #stopBtn { background-color: #f44336; color: white; }
+        #stopBtn:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+        #status { font-size: 15px; color: #aaa; margin-bottom: 20px; }
+        
+        /* تصميم قسم رفع الملفات */
+        #fileUploadSection { background: #2c2c2c; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: none; border: 1px dashed #4CAF50;}
+        input[type="file"] { color: white; margin-right: 10px; }
+        #sendFileBtn { background-color: #008CBA; padding: 8px 16px; font-size: 14px; }
+        #sendFileBtn:hover { background-color: #007399; }
+
+        #chatBox { background: #111; padding: 15px; border-radius: 8px; text-align: left; height: 200px; overflow-y: auto; font-family: monospace; color: #00ffcc; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TechPrep Live Agent 🤖</h1>
+        <p>Live Audio Interview & Code Review</p>
+        
+        <div class="controls">
+            <button id="startBtn">Start Audio Interview</button>
+            <button id="stopBtn" disabled>End Interview</button>
+        </div>
+        <p id="status">Status: Waiting to start...</p>
+
+        <div id="fileUploadSection">
+            <h3>Upload your code file for review 📁</h3>
+            <input type="file" id="codeFileInput" accept=".go,.js,.py,.html,.css,.json,.txt" />
+            <button id="sendFileBtn">Share Code with Agent</button>
+        </div>
+        
+        <div id="chatBox">Terminal Logs:<br></div>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusText = document.getElementById('status');
+        const chatBox = document.getElementById('chatBox');
+        const fileUploadSection = document.getElementById('fileUploadSection');
+        const codeFileInput = document.getElementById('codeFileInput');
+        const sendFileBtn = document.getElementById('sendFileBtn');
+        
+        let ws;
+        let micStream;
+        let audioCtx;
+        let inputCtx;
+        let processor;
+        let nextPlayTime = 0;
+
+        function logToChat(message) {
+            chatBox.innerHTML += `> ${message}<br>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // 1. تشغيل الاتصال والمايك
+        startBtn.onclick = async () => {
+            try {
+                statusText.innerText = "Status: Requesting mic permission...";
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+                nextPlayTime = audioCtx.currentTime;
+
+                ws = new WebSocket('ws://' + window.location.host + '/ws');
+
+                ws.onopen = () => {
+                    statusText.innerText = "Status: Connected & Listening 🎤";
+                    statusText.style.color = "#4CAF50";
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    fileUploadSection.style.display = "block"; // إظهار قسم رفع الملفات
+                    
+                    logToChat("Connected to Tech Lead! You can start speaking or upload a code file.");
+                    startMicCapture();
+                };
+
+                ws.onmessage = async (event) => {
+                    try {
+                        let data = event.data;
+                        if (data instanceof Blob) data = await data.text();
+                        const response = JSON.parse(data);
+                        
+                        if (response.serverContent && response.serverContent.modelTurn) {
+                            const parts = response.serverContent.modelTurn.parts;
+                            for (let part of parts) {
+                                if (part.text) logToChat("Agent: " + part.text);
+                                if (part.inlineData && part.inlineData.data) playPCMAudio(part.inlineData.data);
+                            }
+                        }
+                    } catch (e) { console.error("Error:", e); }
+                };
+
+                ws.onclose = () => {
+                    statusText.innerText = "Status: Disconnected ❌";
+                    statusText.style.color = "#f44336";
+                    resetUI();
+                };
+
+            } catch (err) {
+                console.error('Error:', err);
+                alert("Please allow Microphone permission.");
+                resetUI();
+            }
+        };
+
+        stopBtn.onclick = () => {
+            if (ws) ws.close();
+            resetUI();
+        };
+
+        function resetUI() {
+            if (micStream) micStream.getTracks().forEach(t => t.stop());
+            if (processor) processor.disconnect();
+            if (inputCtx) inputCtx.close();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            fileUploadSection.style.display = "none";
+        }
+
+        // 2. إرسال الكود كـ Text للـ Agent
+        sendFileBtn.onclick = () => {
+            const file = codeFileInput.files[0];
+            if (!file) {
+                alert("Please select a file first!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const codeContent = e.target.result;
+                logToChat(`📄 Sending file "${file.name}" to Agent...`);
+
+                const msg = {
+                    clientContent: {
+                        turns: [{
+                            role: "user",
+                            parts: [{ text: `[System Note: The candidate has shared a file named '${file.name}'. Here is the code:]\n\n${codeContent}\n\n[End of file. Please review it and give your feedback audibly.]` }]
+                        }],
+                        turnComplete: true // هنا نخليها true عشان نطلب منه يرد فوراً بعد ما يقرأ الملف
+                    }
+                };
+                
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify(msg));
+                    logToChat(`✅ File sent successfully. Waiting for Agent's review...`);
+                }
+            };
+            reader.readAsText(file); // قراءة محتوى الملف كنص
+        };
+
+        // 3. معالجة صوت المايك (زي ما هي بالظبط لأنها شغالة بيرفكت)
+        function startMicCapture() {
+            inputCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+            const source = inputCtx.createMediaStreamSource(micStream);
+            processor = inputCtx.createScriptProcessor(4096, 1, 1);
+
+            processor.onaudioprocess = (e) => {
+                if (!ws || ws.readyState !== WebSocket.OPEN) return;
+                const inputData = e.inputBuffer.getChannelData(0);
+                const pcm16 = new Int16Array(inputData.length);
+                for (let i = 0; i < inputData.length; i++) pcm16[i] = Math.max(-1, Math.min(1, inputData[i])) * 32767;
+                
+                const uint8 = new Uint8Array(pcm16.buffer);
+                let binary = '';
+                for (let i = 0; i < uint8.length; i++) binary += String.fromCharCode(uint8[i]);
+                
+                ws.send(JSON.stringify({
+                    realtimeInput: { mediaChunks: [{ mimeType: "audio/pcm;rate=16000", data: window.btoa(binary) }] }
+                }));
+            };
+
+            const gainNode = inputCtx.createGain();
+            gainNode.gain.value = 0;
+            source.connect(processor);
+            processor.connect(gainNode);
+            gainNode.connect(inputCtx.destination);
+        }
+
+        // 4. تشغيل صوت جوجل (نظام الطابور شغال بيرفكت)
+        async function playPCMAudio(base64) {
+            if (!audioCtx) return;
+            const binaryString = window.atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+            
+            const int16Array = new Int16Array(bytes.buffer);
+            const float32Array = new Float32Array(int16Array.length);
+            for (let i = 0; i < int16Array.length; i++) float32Array[i] = int16Array[i] / 32768.0;
+
+            const buffer = audioCtx.createBuffer(1, float32Array.length, 24000);
+            buffer.getChannelData(0).set(float32Array);
+            
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+
+            if (nextPlayTime < audioCtx.currentTime) nextPlayTime = audioCtx.currentTime;
+            source.start(nextPlayTime);
+            nextPlayTime += buffer.duration;
+        }
+    </script>
+</body>
+</html>
