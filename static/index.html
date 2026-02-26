@@ -3,33 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechPrep Live Agent</title>
+    <title>TechPrep Live Agent 🤖</title>
     <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>TechPrep Live Agent 🤖</h1>
-        <p>Live Audio Interview & Code Review</p>
+    </head>
+<body class="zoom-theme">
+    
+    <div class="app-container">
         
-        <div class="controls">
-            <button id="startBtn">Start Audio Interview</button>
-            <button id="stopBtn" disabled>End Interview</button>
-        </div>
-        <p id="status">Status: Waiting to start...</p>
+        <main class="main-content">
+            <div id="aiAvatarContainer" class="avatar-container">
+                <div class="avatar-pulse"></div>
+                <div class="ai-avatar">🤖</div>
+                <p id="aiStatusText">Waiting to start...</p>
+            </div>
 
-        <div id="fileUploadSection">
-            <h3>Upload your code file for review 📁 <span style="color: #aaa; font-size: 14px;">(Optional)</span></h3>
-            <p style="font-size: 13px; color: #ccc; margin-top: 0;">You can just talk to the AI, or share a code file to discuss it!</p>
-            <input type="file" id="codeFileInput" accept=".go,.js,.py,.html,.css,.json,.txt" />
-            <button id="sendFileBtn">Share Code with Agent</button>
-        </div>
+            <div id="codeViewerSection" class="code-viewer-panel">
+                <pre><code id="codeDisplay"></code></pre>
+            </div>
+        </main>
 
-        <div id="codeViewerSection" style="display: none;">
-            <h3>Live Code Viewer 💻</h3>
-            <pre><code id="codeDisplay"></code></pre>
-        </div>
-        
-        <div id="chatBox">Terminal Logs:<br></div>
+        <aside id="sidebar" class="sidebar-panel">
+            <div id="chatBox" class="terminal-logs">Terminal Logs:<br></div>
+            <div id="scorecard" class="scorecard-panel">
+                <h2>📊 Interview Scorecard</h2>
+                <div id="scorecardContent">Evaluation will appear here...</div>
+            </div>
+        </aside>
+
+        <footer class="bottom-toolbar">
+            <div class="toolbar-left">
+                <button id="startBtn" class="btn-start">🎤 Start Call</button>
+                <button id="stopBtn" class="btn-stop" disabled>🛑 End Call</button>
+            </div>
+            
+            <div class="toolbar-center">
+                <div id="fileUploadSection" class="upload-controls">
+                    <input type="text" id="githubUrl" placeholder="Paste GitHub file URL...">
+                    <button id="fetchGithubBtn" class="btn-github">Fetch GitHub</button>
+                    <span class="divider">OR</span>
+                    <input type="file" id="codeFileInput" accept=".go,.js,.py,.html,.css,.json,.txt">
+                    <button id="sendFileBtn" class="btn-upload">Upload File</button>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script src="/static/js/app.js"></script>

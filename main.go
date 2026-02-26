@@ -14,19 +14,22 @@ import (
 func main() {
 	// 1. Load configuration (Environment variables)
 	if err := godotenv.Load(); err != nil {
-		log.Println("ℹ️  Warning: No .env file found, relying on system environment variables")
+		log.Println("ℹ️ Warning: No .env file found")
 	}
 
 	apiKey := os.Getenv("GEMINI_API_KEY")
 	if apiKey == "" {
-		log.Fatal("❌ Critical Error: GEMINI_API_KEY is not set in the environment")
+		log.Fatal("❌ Critical Error: GEMINI_API_KEY is not set")
 	}
 
 	// 2. Initialize the WebSocket handler with dependency injection
 	wsHandler := server.NewWSHandler(apiKey)
+	apiHandler := server.NewAPIHandler(apiKey) // الـ Handler الجديد
 
 	// 3. Define routing
 	http.HandleFunc("/ws", wsHandler.HandleConnections)
+	http.HandleFunc("/api/github", apiHandler.HandleGitHubFetch)
+	http.HandleFunc("/api/evaluate", apiHandler.HandleEvaluate)
 
 	// Serve static files (HTML, CSS, JS) cleanly
 	fs := http.FileServer(http.Dir("./static"))
