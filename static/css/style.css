@@ -1,0 +1,68 @@
+/* General reset and base styles */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    text-align: center; 
+    background-color: #1e1e1e; 
+    color: white; 
+    margin: 0; 
+    padding: 20px; 
+}
+
+h1 { color: #4CAF50; margin-bottom: 5px; }
+
+.container { max-width: 800px; margin: auto; }
+
+/* Controls */
+.controls { 
+    display: flex; 
+    justify-content: center; 
+    gap: 15px; 
+    margin-bottom: 20px; 
+    margin-top: 30px;
+}
+
+button { 
+    padding: 12px 24px; 
+    font-size: 16px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    border: none; 
+    border-radius: 6px; 
+    transition: 0.3s; 
+}
+
+#startBtn { background-color: #4CAF50; color: white; }
+#startBtn:hover { background-color: #45a049; }
+
+#stopBtn { background-color: #f44336; color: white; }
+#stopBtn:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+
+#status { font-size: 15px; color: #aaa; margin-bottom: 20px; }
+
+/* File Upload Section */
+#fileUploadSection { 
+    background: #2c2c2c; 
+    padding: 20px; 
+    border-radius: 8px; 
+    margin-bottom: 20px; 
+    display: none; 
+    border: 1px dashed #4CAF50;
+}
+
+input[type="file"] { color: white; margin-right: 10px; }
+
+#sendFileBtn { background-color: #008CBA; padding: 8px 16px; font-size: 14px; }
+#sendFileBtn:hover { background-color: #007399; }
+
+/* Terminal Chat Box */
+#chatBox { 
+    background: #111; 
+    padding: 15px; 
+    border-radius: 8px; 
+    text-align: left; 
+    height: 200px; 
+    overflow-y: auto; 
+    font-family: monospace; 
+    color: #00ffcc; 
+    font-size: 13px; 
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechPrep Live Agent</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>TechPrep Live Agent 🤖</h1>
+        <p>Live Audio Interview & Code Review</p>
+        
+        <div class="controls">
+            <button id="startBtn">Start Audio Interview</button>
+            <button id="stopBtn" disabled>End Interview</button>
+        </div>
+        <p id="status">Status: Waiting to start...</p>
+
+        <div id="fileUploadSection">
+            <h3>Upload your code file for review 📁</h3>
+            <input type="file" id="codeFileInput" accept=".go,.js,.py,.html,.css,.json,.txt" />
+            <button id="sendFileBtn">Share Code with Agent</button>
+        </div>
+        
+        <div id="chatBox">Terminal Logs:<br></div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
