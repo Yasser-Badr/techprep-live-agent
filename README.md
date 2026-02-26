@@ -37,10 +37,11 @@ techprep-live-agent/
     └── js/app.js
 ```
 ## ✨ Key Features
-* Real-time Voice Conversation: Seamless bidirectional audio streaming using Gorilla WebSockets.
-* Direct Code Injection: Upload your source code files directly to the AI's context window on the fly.
-* Native PCM Audio Processing: Captures 16kHz audio from the microphone and flawlessly plays 24kHz raw PCM responses from Gemini using the browser's Web Audio API.
-* Custom AI Persona: Prompt-engineered to act as a strict but helpful Senior Backend Tech Lead.
+* **Conversational Voice-First Interface:** Start talking to your AI Tech Lead instantly. Ask about System Design, Go concurrency, or RESTful API best practices without needing to type or upload anything.
+* **Optional Code Injection (Live Viewer):** Need a code review? Optionally upload your source code files (`.go`, `.py`, etc.) on the fly. The code is displayed in a Live Viewer in the UI and injected into the AI's context window.
+* **Native PCM Audio Processing:** Captures 16kHz audio from the microphone and flawlessly plays 24kHz raw PCM responses from Gemini using the browser's Web Audio API.
+* **Custom AI Persona:** Prompt-engineered to act as a strict but helpful Senior Backend Tech Lead.
+*
 
 ## 🛠️ Tech Stack
 * Backend: Go (Golang), gorilla/websocket, joho/godotenv

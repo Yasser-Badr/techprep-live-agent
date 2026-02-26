@@ -7,6 +7,10 @@ const fileUploadSection = document.getElementById('fileUploadSection');
 const codeFileInput = document.getElementById('codeFileInput');
 const sendFileBtn = document.getElementById('sendFileBtn');
 
+// New DOM Elements for Live Code Viewer
+const codeViewerSection = document.getElementById('codeViewerSection');
+const codeDisplay = document.getElementById('codeDisplay');
+
 // State Variables
 let ws;
 let micStream;
@@ -39,7 +43,7 @@ startBtn.onclick = async () => {
             stopBtn.disabled = false;
             fileUploadSection.style.display = "block";
             
-            logToChat("Connected to Tech Lead! You can start speaking or upload a code file.");
+            logToChat("Connected to Tech Lead! You can start speaking immediately, or optionally upload code.");
             startMicCapture();
         };
 
@@ -72,19 +76,16 @@ startBtn.onclick = async () => {
     }
 };
 
-// Event: Stop the interview safely (Graceful Shutdown)
+// Event: Stop the interview safely
 stopBtn.onclick = () => {
     logToChat("🛑 Terminating session safely...");
-    
-    //Closing the WebSocket with code 1000 (normal closure)
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.close(1000, "Interview ended by user");
     }
-    
     resetUI();
 };
 
-// Event: Send code file content to the Agent
+// Event: Send code file content to the Agent and show it Live
 sendFileBtn.onclick = () => {
     const file = codeFileInput.files[0];
     if (!file) {
@@ -95,6 +96,11 @@ sendFileBtn.onclick = () => {
     const reader = new FileReader();
     reader.onload = function(e) {
         const codeContent = e.target.result;
+        
+        // Display the code live on the screen
+        codeDisplay.textContent = codeContent;
+        codeViewerSection.style.display = "block";
+
         logToChat(`📄 Sending file "${file.name}" to Agent...`);
 
         const msg = {
@@ -185,7 +191,13 @@ function resetUI() {
 
     startBtn.disabled = false;
     stopBtn.disabled = true;
+    
+    // Hide sections and reset them
     fileUploadSection.style.display = "none";
+    codeViewerSection.style.display = "none";
+    codeDisplay.textContent = "";
+    codeFileInput.value = "";
+    
     statusText.innerText = "Status: Disconnected ❌";
     statusText.style.color = "#aaa";
 }

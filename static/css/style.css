@@ -66,3 +66,35 @@ input[type="file"] { color: white; margin-right: 10px; }
     color: #00ffcc; 
     font-size: 13px; 
 }
+/* Live Code Viewer Section */
+#codeViewerSection {
+    background: #1e1e1e;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #444;
+    text-align: left;
+}
+
+#codeViewerSection h3 {
+    margin-top: 0;
+    color: #4CAF50;
+    font-size: 16px;
+}
+
+pre {
+    background: #111;
+    padding: 15px;
+    border-radius: 6px;
+    overflow-x: auto;
+    max-height: 300px; /* It scrolls if the code is long*/
+    overflow-y: auto;
+    border: 1px solid #333;
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
+    color: #dcdcaa; /* A color close to VS Code */
+    font-size: 14px;
+    white-space: pre;
+}
