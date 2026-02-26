@@ -33,7 +33,7 @@ function logToChat(message) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// 💡 التعديل هنا: دالة resetUI مبقتش تخفي التقييم!
+// 💡 Edit here: The resetUI function no longer hides the rating!
 function resetUI() {
     if (micStream) micStream.getTracks().forEach(track => track.stop());
     if (processor) processor.disconnect();
@@ -49,13 +49,14 @@ function resetUI() {
     codeFileInput.value = "";
     githubUrlInput.value = "";
 
-    // إرجاع الـ Avatar وتصفير حالته
+    // Return the Avatar and zero its status
     aiAvatarContainer.style.display = "flex";
     aiAvatarContainer.classList.remove('speaking');
     aiStatusText.innerText = "Call ended ❌. Start new call?";
     aiStatusText.style.color = "#aaa";
 
-    // لاحظ: معملناش إخفاء للـ Sidebar والـ Scorecard عشان تفضل تقرأ التقييم
+    //Note: We did not hide the Sidebar and Scorecard so you can read the review
+
 }
 
 startBtn.onclick = async () => {
@@ -77,7 +78,7 @@ startBtn.onclick = async () => {
             toolbarCenter.style.display = "flex";
             sidebar.style.display = "flex";
             
-            // 💡 إخفاء التقييم القديم فقط لما تبدأ مكالمة جديدة
+            // 💡 Hide the old rating only when you start a new call
             scorecard.style.display = "none"; 
             sharedCodeContext = "No code shared. General technical discussion.";
 
@@ -112,7 +113,7 @@ startBtn.onclick = async () => {
 stopBtn.onclick = async () => {
     logToChat("🛑 Ending session...");
 
-    // 💡 إظهار شاشة التقييم فوراً وتجهيزها قبل ما المكالمة تقفل
+    // 💡 Show the evaluation screen immediately and prepare it before the call hangs up
     sidebar.style.display = "flex";
     scorecard.style.display = "block";
 
@@ -133,7 +134,7 @@ stopBtn.onclick = async () => {
         }
     }
 
-    // إغلاق الاتصال بعد ما جهزنا شاشة التقييم
+    // Close the connection after we have prepared the evaluation screen
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.close(1000, "Interview ended by user");
     } else {

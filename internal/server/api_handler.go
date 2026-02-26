@@ -27,7 +27,7 @@ func NewAPIHandler(apiKey string) *APIHandler {
 	return &APIHandler{APIKey: apiKey}
 }
 
-// 1. جلب الكود من GitHub
+// 1. Fetch the code from GitHub
 func (h *APIHandler) HandleGitHubFetch(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		URL string `json:"url"`
@@ -68,14 +68,14 @@ func (h *APIHandler) HandleGitHubFetch(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"code": code})
 }
 
-// 2. التقييم النهائي (آمن 100% ومضاد للانهيار)
+// 2. Final Rating (100% safe and anti-collapse)
 func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		CodeContext string `json:"code_context"`
 	}
 	json.NewDecoder(r.Body).Decode(&req)
 
-	// استخدام موديل 2.5 المستقر للنصوص
+	// Use the stable 2.5 text model
 	geminiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=%s", h.APIKey)
 
 	prompt := fmt.Sprintf(`You are an expert Backend Tech Lead. Evaluate the following code and provide a scorecard. 
@@ -105,7 +105,7 @@ func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 
 	bodyBytes, _ := io.ReadAll(resp.Body)
 
-	// لو جوجل رفضت الطلب لأي سبب، هنطبع السبب في الـ Terminal عشان نعرفه
+	// If Google rejects the request for any reason, we will print the reason in the Terminal so we know it
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("❌ Gemini API Error: %s", string(bodyBytes))
 		w.Header().Set("Content-Type", "application/json")
@@ -113,7 +113,7 @@ func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// قراءة الـ JSON بطريقة هيكلية آمنة لمنع الـ Panics
+	// Read JSON in a structurally safe way to prevent Panics
 	type GeminiResponse struct {
 		Candidates []struct {
 			Content struct {
@@ -132,7 +132,7 @@ func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// استخراج النص وإرساله للمتصفح
+	// Extract the text and send it to the browser
 	if len(result.Candidates) > 0 && len(result.Candidates[0].Content.Parts) > 0 {
 		evaluationText := result.Candidates[0].Content.Parts[0].Text
 		w.Header().Set("Content-Type", "application/json")

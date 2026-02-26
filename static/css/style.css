@@ -23,19 +23,19 @@ body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
     background-color: var(--bg-color); 
     color: var(--text-primary); 
-    overflow: hidden; /* لمنع الـ scroll الأساسي للجسم */
+    overflow: hidden; /* To prevent the main scroll of the body*/
 }
 
 /* --- Main App Container (Flexbox) --- */
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* ملء الشاشة بالكامل */
+    height: 100vh; /* Full screen*/
 }
 
 /* --- Main Chat/Code Area --- */
 .main-content {
-    flex: 1; /* تأخذ باقي المساحة المتاحة */
+    flex: 1; /* It takes up the rest of the available space*/
     background-color: var(--main-bg);
     display: flex;
     justify-content: center;
@@ -50,7 +50,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-content: 1; /* عشان تظهر فوق الـ pulse */
+    z-content: 1; /* So that it appears above the pulse */
 }
 
 .ai-avatar {
@@ -64,14 +64,14 @@ body {
     border: 3px solid var(--agent-color);
 }
 
-/* تأثير التموج (الجذاب والمريح للعين) */
+/* Ripple effect (attractive and soothing to the eye)*/
 .avatar-pulse {
     position: absolute;
     width: 140px;
     height: 140px;
     border-radius: 50%;
     background-color: rgba(0, 255, 204, 0.2);
-    animation: none; /* هيتم تفعيله بالـ JavaScript لما الـ AI يتكلم */
+    animation: none; /* It will be activated with JavaScript when the AI ​​speaks*/
 }
 
 @keyframes pulse {
@@ -86,7 +86,7 @@ body {
     font-size: 16px;
 }
 
-/* إضافة class بالـ JS لتفعيل التموج */
+/* Add a class in JS to activate ripple*/
 .speaking .avatar-pulse {
     animation: pulse 1.5s infinite ease-out;
 }
@@ -100,9 +100,9 @@ body {
 .code-viewer-panel {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    display: none; /* هيتم إظهاره بالـ JS */
+    display: none; /* It will be displayed in JS */
     background-color: rgba(17, 20, 26, 0.95);
-    z-index: 2; /* فوق الـ Avatar */
+    z-index: 2; /* Above the Avatar */
     padding: 20px;
     overflow: hidden;
 }
@@ -129,15 +129,15 @@ body {
 .sidebar-panel {
     display: flex;
     flex-direction: column;
-    width: 300px; /* عرض ثابت */
+    width: 300px; /* Fixed width*/
     position: absolute;
     right: 0; top: 0; bottom: 0;
     background-color: var(--sidebar-bg);
     border-left: 1px solid var(--panel-border);
     padding: 15px;
     overflow-y: auto;
-    display: none; /* هيتم إظهارها بالـ JS أو عند الاتصال */
-    margin-bottom: 71px; /* عشان متغطيش الـ toolbar */
+    display: none; /* It will be shown in JS or on call*/
+    margin-bottom: 71px; /* Because you don't cover the toolbar */
 }
 
 .terminal-logs {
@@ -161,7 +161,7 @@ body {
     border-radius: 8px;
     border: 2px solid var(--accent-blue);
     text-align: left;
-    display: none; /* هيتم إظهاره بالـ JS في النهاية */
+    display: none; /* It will be shown in JS at the end*/
 }
 
 .scorecard-panel h2 { color: var(--text-primary); margin-top: 0;}
@@ -184,7 +184,7 @@ body {
     align-items: center;
 }
 
-.toolbar-center { display: none; } /* هيظهر لما المكالمة تبدأ */
+.toolbar-center { display: none; } /* It will appear when the call starts*/
 
 /* --- Buttons --- */
 button { 

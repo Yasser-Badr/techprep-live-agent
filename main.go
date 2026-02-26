@@ -24,7 +24,7 @@ func main() {
 
 	// 2. Initialize the WebSocket handler with dependency injection
 	wsHandler := server.NewWSHandler(apiKey)
-	apiHandler := server.NewAPIHandler(apiKey) // الـ Handler الجديد
+	apiHandler := server.NewAPIHandler(apiKey) 
 
 	// 3. Define routing
 	http.HandleFunc("/ws", wsHandler.HandleConnections)
