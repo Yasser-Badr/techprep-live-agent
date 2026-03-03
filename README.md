@@ -35,40 +35,42 @@ The easiest way for judges and developers to run this project is using Docker. I
    git clone https://github.com/Yasser-Bader/techprep-live-agent.git
    cd techprep-live-agent
 
- * Set up Environment Variables:
+ 2. Set up Environment Variables:
    Create a .env file in the root directory and add your Gemini API Key:
    GEMINI_API_KEY=your_actual_api_key_here
 
- * Build and Run with Docker Compose:
+ 3. Build and Run with Docker Compose:
    docker-compose up -d --build
 
- * Access the Application:
+ 4. Access the Application:
    Open your browser and navigate to: http://localhost
    (Note: Browsers require HTTPS or localhost to allow microphone access. Running on localhost works perfectly for testing).
- * Stop the Application:
+ 5. Stop the Application:
    docker-compose down
 
-🛠️ Manual Setup (Without Docker)
+## 🛠️ Manual Setup (Without Docker)
 If you prefer to run the Go application directly on your machine:
- * Ensure you have Go 1.22+ installed.
- * Clone the repository and navigate into it.
- * Export your API key:
+ 1. Ensure you have Go 1.22+ installed.
+ 2. Clone the repository and navigate into it.
+ 3. Export your API key:
    export GEMINI_API_KEY="your_actual_api_key_here"
 
- * Download dependencies and run:
+ 4. Download dependencies and run:
    go mod tidy
 go run main.go
 
- * The server will start at http://localhost:8080.
-🎮 How to Use (Demo Flow)
- * Click Start Call and grant microphone permissions.
- * The AI will introduce itself and ask about your tech stack and if you have any code to share.
- * Respond using your voice.
- * Code Review: Paste a link to a raw file from GitHub in the input box and click Fetch GitHub. The AI will instantly read it and start discussing it with you.
- * Click End Call when finished to receive your detailed architectural Scorecard.
-🤝 Contributing
+ 5. The server will start at http://localhost:8080.
+## 🎮 How to Use (Demo Flow)
+ 1. Click Start Call and grant microphone permissions.
+ 2. The AI will introduce itself and ask about your tech stack and if you have any code to share.
+ 3. Respond using your voice.
+ 4. Code Review: Paste a link to a raw file from GitHub in the input box and click Fetch GitHub. The AI will instantly read it and start discussing it with you.
+ 5. Click End Call when finished to receive your detailed architectural Scorecard.
+
+## 🤝 Contributing
 Contributions are welcome! Please fork the repository and submit a pull request for any enhancements.
-📝 License
+
+## 📝 License
 This project is licensed under the MIT License.
 
 
