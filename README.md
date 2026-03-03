@@ -1,87 +1,75 @@
-# 🎙️ TechPrep Live Agent
+# 🤖 TechPrep Live Agent
 
-**Your Real-Time AI Technical Interviewer & Code Reviewer**
+**Your 24/7 AI Senior Tech Lead for ANY Tech Stack.**
 
-TechPrep Live Agent is a voice-first, low-latency mock interview simulator tailored for Backend Developers. Built with **Go (Golang)** and powered by the **Gemini Multimodal Live API**, it allows candidates to practice technical interviews, discuss system architecture, and get real-time audio feedback on their actual code.
+TechPrep Live Agent is a real-time, voice-first AI companion built with Go and the Gemini Multimodal Live API. It conducts dynamic technical interviews, performs live code reviews via direct GitHub integration, and generates automated architectural scorecards—all designed to help developers practice under pressure without the hassle of screen-sharing latency.
 
----
-
-## 🚀 The Hackathon Pivot: A Smart Architecture Decision
-During development, we initially aimed to use screen-sharing (Vision) combined with real-time audio. However, due to API constraints where the ultra-fast `native-audio` models did not simultaneously support bidirectional vision streaming, we engineered a **smarter, faster, and more accurate approach**:
-
-Instead of relying on image-to-text, we implemented **Direct Code Injection via File Uploads & GitHub Fetching**. 
-**The Result?** - **100% Accuracy:** The AI reads the exact syntax, eliminating visual hallucinations.
-- **Ultra-Low Latency:** Bypassing image processing keeps the bidirectional audio stream blazing fast.
-- **Cost-Optimized:** The system detects if code was actually shared; if not, it gracefully skips unnecessary API evaluation calls.
+## 🔥 Killer Features
+* **Dynamic AI Persona:** Adapts the interview flow based on your specific tech stack (Backend, Frontend, DevOps, etc.).
+* **Ultra-Low Latency Voice:** Bidirectional audio streaming using WebSockets and Gemini Live API (`gemini-2.5-flash-native-audio-preview`).
+* **Direct GitHub Code Injection:** Paste a GitHub file URL, and the Go backend fetches and injects the raw code directly into the AI's context—eliminating AI visual hallucinations.
+* **Automated Scorecard:** Evaluates your performance, highlights bugs, and provides system design advice using Gemini 2.5 Flash Text API after the call ends.
+* **Production-Ready Infrastructure:** Fully containerized with **Docker & Docker Compose**, utilizing an Nginx reverse proxy for secure WebSocket (WSS) handling.
 
 ---
 
-## ✨ Killer Features
-* 👔 **Zoom-Like Professional UI:** A clean, split-pane layout featuring a reactive AI Avatar that pulses when speaking, providing a comfortable and distraction-free user experience.
-* 🐙 **Live GitHub Integration:** Paste a GitHub file URL, and the Go backend concurrently fetches the raw code using `goroutines` and injects it into the AI's context window.
-* 📊 **Automated Interview Scorecard:** Once the interview ends, the system invokes the Gemini 2.5 Flash Text API to evaluate the discussed code, generating a structured scorecard (Code Quality Score, Bugs, Architectural Advice).
-* ⚡ **Real-time Voice Conversation:** Seamless bidirectional audio streaming using Gorilla WebSockets and Native PCM Audio Processing (16kHz in, 24kHz out).
+## 🏗️ Architecture
+* **Backend:** Go (Golang) with Clean Architecture.
+* **Frontend:** Vanilla JavaScript, Web Audio API, HTML5, CSS3 (Zoom-like dark theme).
+* **Infrastructure:** Docker, Docker Compose, Nginx, AWS EC2.
+* **AI Models:** Google Gemini Multimodal Live API & Gemini Text API.
 
 ---
 
-## 🏗️ System Architecture & Clean Code
-This project follows the **Standard Go Project Layout** and clean architecture principles:
+## 🚀 Quick Start (Recommended: Using Docker)
 
-* **Separation of Concerns:** The Frontend is entirely decoupled from the Backend logic.
-* **Interface-Driven Extensibility:** Built with `CodeFetcher` and `Evaluator` interfaces, allowing easy future integration with other platforms (e.g., GitLab) or AI models (e.g., Anthropic, OpenAI).
-* **Concurrency:** Utilizes Go's `goroutines` and `sync.WaitGroup` for non-blocking API calls (like fetching from GitHub).
-* **Graceful Shutdown:** Implemented clean WebSocket closures (`Code 1000`) and comprehensive cleanup of browser audio resources to prevent memory leaks.
-
----
-
-## 🛠️ Tech Stack
-* **Backend:** Go (Golang), `gorilla/websocket`, `joho/godotenv`
-* **Frontend:** Vanilla HTML5, CSS3 (Zoom-like Dark Theme), ES6 JavaScript, Web Audio API
-* **AI Models:** * *Voice:* `gemini-2.5-flash-native-audio-preview` (via Bidi-Streaming)
-  * *Evaluation:* `gemini-2.5-flash` (via REST API)
-
----
-
-## ⚙️ How to Run Locally
+The easiest way for judges and developers to run this project is using Docker. It spins up both the Go backend and the Nginx reverse proxy automatically.
 
 ### Prerequisites
-1. **Go:** Make sure you have Go installed on your machine.
-2. **Gemini API Key:** Get your API key from [Google AI Studio](https://aistudio.google.com/).
+* [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/) installed on your machine.
+* A Google Gemini API Key.
 
-### Installation Steps
-
+### Steps to Run
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/Yasser-Bader/techprep-live-agent.git
    cd techprep-live-agent
 
-2. **Set up Environment Variables:**
-
-    Create a .env file in the root directory and add your API key:
-   ```bash
+ * Set up Environment Variables:
+   Create a .env file in the root directory and add your Gemini API Key:
    GEMINI_API_KEY=your_actual_api_key_here
-(Note: The .env file is included in .gitignore to keep your key secure).
 
-3. **Install Dependencies:**
-   ```bash
+ * Build and Run with Docker Compose:
+   docker-compose up -d --build
+
+ * Access the Application:
+   Open your browser and navigate to: http://localhost
+   (Note: Browsers require HTTPS or localhost to allow microphone access. Running on localhost works perfectly for testing).
+ * Stop the Application:
+   docker-compose down
+
+🛠️ Manual Setup (Without Docker)
+If you prefer to run the Go application directly on your machine:
+ * Ensure you have Go 1.22+ installed.
+ * Clone the repository and navigate into it.
+ * Export your API key:
+   export GEMINI_API_KEY="your_actual_api_key_here"
+
+ * Download dependencies and run:
    go mod tidy
+go run main.go
 
-4. **Run the Server:**
-   ```bash
-   go run main.go
+ * The server will start at http://localhost:8080.
+🎮 How to Use (Demo Flow)
+ * Click Start Call and grant microphone permissions.
+ * The AI will introduce itself and ask about your tech stack and if you have any code to share.
+ * Respond using your voice.
+ * Code Review: Paste a link to a raw file from GitHub in the input box and click Fetch GitHub. The AI will instantly read it and start discussing it with you.
+ * Click End Call when finished to receive your detailed architectural Scorecard.
+🤝 Contributing
+Contributions are welcome! Please fork the repository and submit a pull request for any enhancements.
+📝 License
+This project is licensed under the MIT License.
 
-5. **Start the Interview:**
-
-* Open your browser and navigate to http://localhost:8080.
-* ​Click Start Call and allow microphone access.
-* ​Start speaking to your AI Tech Lead!
-* ​Upload a code file or paste a GitHub link to discuss it.
-* ​Click End Call to instantly receive your customized Interview Scorecard.
-
-## 🔮 Future Improvements & Roadmap
-* Pluggable AI Models: Thanks to our AIClient interface, we plan to support multiple AI backends (e.g., Anthropic Claude, OpenAI, or future Gemini iterations) allowing users to choose their preferred interviewer's "brain".
-* Interruption Support: Add support for conversational interruption (barge-in) for a more natural back-and-forth flow.
-* WebRTC Migration: Upgrade from WebSockets to WebRTC for even better audio streaming handling under poor network conditions.
-* Interview Reports: Generate an automated summary and score of the candidate's performance at the end of the session.
 
 `Built for the Gemini API Developer Hackathon.`

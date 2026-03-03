@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  # 1. Backend service (our Go app)
+  techprep-app:
+    build: .
+    container_name: techprep-backend
+    restart: unless-stopped
+    env_file:
+      - .env  # Automatically reads the Gemini key from your .env file
+    expose:
+      - "8080" # Expose this port internally only for Nginx to communicate with it
+
+  # 2. Reverse proxy service (Nginx)
+  nginx:
+    image: nginx:alpine
+    container_name: techprep-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80" # Port exposed to the outside world
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf # Bind Nginx configuration file
+    depends_on:
+      - techprep-app # Wait for the Go app to start first
+      

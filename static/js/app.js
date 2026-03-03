@@ -67,8 +67,9 @@ startBtn.onclick = async () => {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
         nextPlayTime = audioCtx.currentTime;
 
-        ws = new WebSocket('ws://' + window.location.host + '/ws');
-
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        ws = new WebSocket(wsProtocol + window.location.host + '/ws');
+        
         ws.onopen = () => {
             aiStatusText.innerText = "Connected! Tech Lead is listening 🎤";
             aiStatusText.style.color = "#00ffcc";

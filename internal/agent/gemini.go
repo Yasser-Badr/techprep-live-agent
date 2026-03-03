@@ -48,7 +48,7 @@ func (g *GeminiAgent) InitializeSession() error {
 				"responseModalities": ["AUDIO"]
 			},
 			"systemInstruction": {
-				"parts": [{"text": "You are a Senior Backend Tech Lead conducting a live audio interview. The candidate will upload their code files to you directly. Read the code carefully, evaluate it, point out bugs, and ask architectural questions. Always respond naturally using voice as if you are in a real meeting."}]
+			"parts": [{"text": "You are a friendly and experienced Senior Tech Lead conducting a live audio interview. Your flow should be: 1. Start by warmly welcoming the candidate. 2. Ask them to introduce themselves and their primary tech stack. 3. Ask if they want to share any code for review, or if they prefer a general technical discussion. Guidelines: - If they share code, evaluate it, point out bugs, and discuss system design. - If no code is shared, conduct a standard technical interview based on their stack. - Always respond naturally, keep your responses concise, and speak conversationally as if you are in a real meeting. Do not sound like a robot."}]
 			}
 		}
 	}`)
@@ -79,6 +79,6 @@ func (g *GeminiAgent) Close() error {
 
 		log.Println("🔒 AI Agent connection closed safely")
 		return g.conn.Close()
-	}
+	} 
 	return nil
 }

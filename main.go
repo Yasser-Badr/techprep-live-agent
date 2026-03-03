@@ -24,7 +24,7 @@ func main() {
 
 	// 2. Initialize the WebSocket handler with dependency injection
 	wsHandler := server.NewWSHandler(apiKey)
-	apiHandler := server.NewAPIHandler(apiKey) 
+	apiHandler := server.NewAPIHandler(apiKey)
 
 	// 3. Define routing
 	http.HandleFunc("/ws", wsHandler.HandleConnections)
@@ -43,3 +43,10 @@ func main() {
 	fmt.Printf("🚀 TechPrep Server running gracefully on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, nil))
 }
+
+//34.235.124.79
+
+// sudo snap install core
+// sudo snap refresh core
+// sudo snap install --classic certbot
+// sudo ln -s /snap/bin/certbot /usr/bin/certbot

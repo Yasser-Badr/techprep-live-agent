@@ -219,3 +219,56 @@ input[type="text"] {
 }
 input[type="file"] { color: var(--text-secondary); font-size: 13px; }
 .divider { color: var(--text-secondary); font-size: 12px; font-weight: bold;}
+
+/* --- Mobile Responsiveness (Adjusting the phone's sizes) --- */
+@media screen and (max-width: 768px) {
+    /* 1. Modify the bottom bar to be vertical (so the buttons don’t get pressed)*/
+    .bottom-toolbar {
+        height: auto;
+        flex-direction: column;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .toolbar-left, .toolbar-center {
+        width: 100%;
+        flex-direction: column; /* The buttons are stacked on top of each other*/
+        gap: 10px;
+    }
+
+    .upload-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    input[type="text"] {
+        width: 100%; /* The GitHub field takes the screen width*/
+    }
+
+    button {
+        width: 100%; /* The buttons should be wide for easy pressing with a finger*/
+        padding: 15px; /* Enlarge the button a little for the mobile*/
+        font-size: 16px;
+    }
+
+    /* 2. Edit the side panel (Logs & Scorecard) */
+    .sidebar-panel {
+        position: relative; /* Unpin on the right*/
+        width: 100%; /* Take the full width of the screen*/
+        height: 250px; /* Suitable length for the mobile*/
+        border-left: none;
+        border-top: 1px solid var(--panel-border);
+        margin-bottom: 0;
+    }
+
+    /* 3. Reduce the size of the Avatar a little to save space*/
+    .ai-avatar {
+        font-size: 60px;
+        padding: 15px;
+    }
+
+    .avatar-pulse {
+        width: 110px;
+        height: 110px;
+    }
+}
