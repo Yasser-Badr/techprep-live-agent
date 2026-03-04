@@ -18,6 +18,7 @@ TechPrep Live Agent is a real-time, voice-first AI companion built with Go and t
 * **Frontend:** Vanilla JavaScript, Web Audio API, HTML5, CSS3 (Zoom-like dark theme).
 * **Infrastructure:** Docker, Docker Compose, Nginx, AWS EC2.
 * **AI Models:** Google Gemini Multimodal Live API & Gemini Text API.
+* ![TechPrep Architecture](assets/TechPrep.jpg)
 
 ---
 
