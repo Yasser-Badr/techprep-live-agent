@@ -1,4 +1,3 @@
-عاش جداً يا هندسة! إضافتك لصورة الـ Architecture (![TechPr
 # 🤖 TechPrep Live Agent
 
 **Your 24/7 AI Senior Tech Lead for ANY Tech Stack.**
