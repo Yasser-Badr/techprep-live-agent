@@ -1,0 +1,35 @@
+name: Go CI/CD Pipeline
+
+# يشتغل أوتوماتيك مع أي Push أو Pull Request
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. سحب الكود من المستودع
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. تسطيب لغة Go
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.26'
+
+    # 3. تحميل المكتبات
+    - name: Install Dependencies
+      run: go mod download
+
+    # 4. تشغيل كل اختبارات الوحدة (Unit Tests)
+    - name: Run Unit Tests
+      run: go test -v ./...
+
+    # 5. التأكد من أن السيرفر قابل للبناء (Build)
+    - name: Build Project
+      run: go build -v ./main.go

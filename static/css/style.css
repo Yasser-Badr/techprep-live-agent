@@ -1,41 +1,36 @@
 /* --- Zoom-like Dark Theme & Eye Comfort Palette --- */
 :root {
-    --bg-color: #1a1e26;       /* Deep grayish blue - base background */
-    --main-bg: #11141a;        /* Darker gray - main chat area */
-    --sidebar-bg: #1a1e26;     /* Same as base - sidebar */
-    --toolbar-bg: #161a20;     /* Slightly different gray - bottom toolbar */
-    --panel-border: #2c3440;   /* Muted gray-blue - borders */
-    
-    --text-primary: #e0e6ed;   /* Off-white - primary text */
-    --text-secondary: #9aa5b1; /* Muted gray - labels, secondary text */
-    
-    --accent-green: #2ecc71;   /* Calm green - start/success */
-    --accent-red: #e74c3c;     /* Calm red - stop/danger */
-    --accent-blue: #3498db;    /* Professional blue - fetch/upload */
-    --agent-color: #00ffcc;    /* Tealy cyan - agent logs/accents */
-    --code-color: #dcdcaa;     /* Classic VS Code style color */
+    --bg-color: #1a1e26;       
+    --main-bg: #11141a;        
+    --sidebar-bg: #1a1e26;     
+    --toolbar-bg: #161a20;     
+    --panel-border: #2c3440;   
+    --text-primary: #e0e6ed;   
+    --text-secondary: #9aa5b1; 
+    --accent-green: #2ecc71;   
+    --accent-red: #e74c3c;     
+    --accent-blue: #3498db;    
+    --agent-color: #00ffcc;    
+    --code-color: #dcdcaa;     
 }
 
-/* --- General reset --- */
 * { box-sizing: border-box; }
 body { 
     margin: 0; 
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
     background-color: var(--bg-color); 
     color: var(--text-primary); 
-    overflow: hidden; /* To prevent the main scroll of the body*/
+    overflow: hidden; 
 }
 
-/* --- Main App Container (Flexbox) --- */
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Full screen*/
+    height: 100vh;
 }
 
-/* --- Main Chat/Code Area --- */
 .main-content {
-    flex: 1; /* It takes up the rest of the available space*/
+    flex: 1; 
     background-color: var(--main-bg);
     display: flex;
     justify-content: center;
@@ -45,12 +40,11 @@ body {
     border-bottom: 1px solid var(--panel-border);
 }
 
-/* --- AI Avatar & Pulse Effect --- */
 .avatar-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-content: 1; /* So that it appears above the pulse */
+    z-index: 1; 
 }
 
 .ai-avatar {
@@ -62,16 +56,26 @@ body {
     justify-content: center;
     align-items: center;
     border: 3px solid var(--agent-color);
+    transition: transform 0.3s;
 }
 
-/* Ripple effect (attractive and soothing to the eye)*/
+/* Avatar Nodding Animation */
+.ai-avatar.speaking-animation {
+    animation: nod 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes nod {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-8px) scale(1.02); }
+}
+
 .avatar-pulse {
     position: absolute;
     width: 140px;
     height: 140px;
     border-radius: 50%;
     background-color: rgba(0, 255, 204, 0.2);
-    animation: none; /* It will be activated with JavaScript when the AI ​​speaks*/
+    animation: none; 
 }
 
 @keyframes pulse {
@@ -80,94 +84,80 @@ body {
     100% { transform: scale(1.3); opacity: 0; }
 }
 
+.speaking .avatar-pulse {
+    animation: pulse 1.5s infinite ease-out;
+}
+
+/* Waveform Animation */
+.waveform {
+    display: flex;
+    gap: 5px;
+    height: 35px;
+    align-items: flex-end;
+    margin-top: 15px;
+    opacity: 0; 
+    transition: opacity 0.3s;
+}
+.waveform.active { opacity: 1; }
+.bar {
+    width: 6px;
+    background: var(--agent-color);
+    border-radius: 3px;
+    animation: wave 1s infinite ease-in-out;
+}
+.bar:nth-child(1) { animation-delay: 0.0s; }
+.bar:nth-child(2) { animation-delay: 0.2s; }
+.bar:nth-child(3) { animation-delay: 0.4s; }
+.bar:nth-child(4) { animation-delay: 0.2s; }
+.bar:nth-child(5) { animation-delay: 0.0s; }
+
+@keyframes wave {
+    0%, 100% { height: 8px; }
+    50% { height: 35px; }
+}
+
 #aiStatusText {
     margin-top: 15px;
     color: var(--text-secondary);
     font-size: 16px;
 }
-
-/* Add a class in JS to activate ripple*/
-.speaking .avatar-pulse {
-    animation: pulse 1.5s infinite ease-out;
-}
-
 .speaking #aiStatusText {
     color: var(--agent-color);
     font-weight: bold;
 }
 
-/* --- Code Viewer Panel --- */
 .code-viewer-panel {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    display: none; /* It will be displayed in JS */
+    display: none; 
     background-color: rgba(17, 20, 26, 0.95);
-    z-index: 2; /* Above the Avatar */
+    z-index: 2; 
     padding: 20px;
     overflow: hidden;
 }
 
-.code-viewer-panel pre {
-    background: transparent;
-    padding: 0;
-    border: none;
-    margin: 0;
-    height: 100%;
-}
+.code-viewer-panel pre { background: transparent; padding: 0; border: none; margin: 0; height: 100%; }
+.code-viewer-panel code { font-family: 'Consolas', monospace; color: var(--code-color); font-size: 14px; white-space: pre-wrap; display: block; height: 100%; overflow-y: auto; }
 
-.code-viewer-panel code {
-    font-family: 'Consolas', 'Courier New', monospace;
-    color: var(--code-color);
-    font-size: 14px;
-    white-space: pre-wrap;
-    display: block;
-    height: 100%;
-    overflow-y: auto;
-}
-
-/* --- Sidebar Panel --- */
 .sidebar-panel {
     display: flex;
     flex-direction: column;
-    width: 300px; /* Fixed width*/
+    width: 300px; 
     position: absolute;
     right: 0; top: 0; bottom: 0;
     background-color: var(--sidebar-bg);
     border-left: 1px solid var(--panel-border);
     padding: 15px;
     overflow-y: auto;
-    display: none; /* It will be shown in JS or on call*/
-    margin-bottom: 71px; /* Because you don't cover the toolbar */
+    display: none; 
+    margin-bottom: 71px; 
 }
 
-.terminal-logs {
-    flex: 1;
-    background: #111;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: left;
-    height: 50%;
-    overflow-y: auto;
-    font-family: monospace;
-    color: var(--agent-color);
-    font-size: 13px;
-    margin-bottom: 15px;
-}
-
-.scorecard-panel {
-    flex: 1;
-    background: rgba(0, 140, 186, 0.1);
-    padding: 20px;
-    border-radius: 8px;
-    border: 2px solid var(--accent-blue);
-    text-align: left;
-    display: none; /* It will be shown in JS at the end*/
-}
-
+.terminal-logs { flex: 1; background: #111; padding: 15px; border-radius: 8px; text-align: left; height: 50%; overflow-y: auto; font-family: monospace; color: var(--agent-color); font-size: 13px; margin-bottom: 15px; }
+.scorecard-panel { flex: 1; background: rgba(0, 140, 186, 0.1); padding: 20px; border-radius: 8px; border: 2px solid var(--accent-blue); text-align: left; display: none; }
 .scorecard-panel h2 { color: var(--text-primary); margin-top: 0;}
 #scorecardContent { color: var(--text-primary); font-family: monospace; }
 
-/* --- Bottom Toolbar (Flexbox) --- */
 .bottom-toolbar {
     height: 70px;
     background-color: var(--toolbar-bg);
@@ -178,97 +168,163 @@ body {
     border-top: 1px solid var(--panel-border);
 }
 
-.toolbar-left, .toolbar-center {
-    display: flex;
-    gap: 15px;
-    align-items: center;
+.toolbar-left, .toolbar-center { display: flex; gap: 10px; align-items: center; }
+.toolbar-center { display: none; } 
+
+.persona-dropdown {
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: #2c2f33;
+    color: white;
+    border: 1px solid #7289da;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
 }
 
-.toolbar-center { display: none; } /* It will appear when the call starts*/
-
-/* --- Buttons --- */
-button { 
-    padding: 10px 20px; 
-    font-size: 14px; 
-    font-weight: bold; 
-    cursor: pointer; 
-    border: none; 
-    border-radius: 6px; 
-    transition: background-color 0.2s, transform 0.1s; 
-}
-
+button { padding: 10px 15px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; border-radius: 6px; transition: all 0.2s; }
 button:hover { transform: scale(1.02); }
 button:active { transform: scale(0.98); }
-button:disabled { background-color: #555 !important; color: #888 !important; cursor: not-allowed; }
+button:disabled { background-color: #444 !important; color: #888 !important; border-color: #444 !important; cursor: not-allowed; }
 
 .btn-start { background-color: var(--accent-green); color: white; }
-.btn-start:hover { background-color: #27ae60; }
-
 .btn-stop { background-color: var(--accent-red); color: white; }
-.btn-stop:hover { background-color: #c0392b; }
-
+.btn-secondary { background-color: #2f3136; color: white; border: 1px solid #7289da; }
 .btn-github { background-color: #6e5494; color: white; }
 .btn-upload { background-color: var(--accent-blue); color: white; }
 
-/* --- Inputs & Divider --- */
 .upload-controls { display: flex; gap: 10px; align-items: center; }
-input[type="text"] { 
-    padding: 10px; width: 250px; 
-    border-radius: 4px; border: 1px solid var(--panel-border); 
-    background: #111; color: var(--text-primary); 
-}
-input[type="file"] { color: var(--text-secondary); font-size: 13px; }
+input[type="text"] { padding: 10px; width: 200px; border-radius: 4px; border: 1px solid var(--panel-border); background: #111; color: var(--text-primary); }
+input[type="file"] { color: var(--text-secondary); font-size: 13px; max-width: 200px; }
 .divider { color: var(--text-secondary); font-size: 12px; font-weight: bold;}
 
-/* --- Mobile Responsiveness (Adjusting the phone's sizes) --- */
+/* --- Mobile Responsiveness --- */
 @media screen and (max-width: 768px) {
-    /* 1. Modify the bottom bar to be vertical (so the buttons don’t get pressed)*/
-    .bottom-toolbar {
-        height: auto;
-        flex-direction: column;
-        padding: 15px;
-        gap: 15px;
-    }
+    .bottom-toolbar { height: auto; flex-direction: column; padding: 15px; gap: 15px; }
+    
+    .persona-container { margin-right: 0 !important; width: 100%; }
+    .persona-dropdown { width: 100%; padding: 12px; font-size: 16px; }
 
-    .toolbar-left, .toolbar-center {
+    /* شبكة زراير 2x2 على الموبايل لشكل أشيك */
+    .toolbar-left {
         width: 100%;
-        flex-direction: column; /* The buttons are stacked on top of each other*/
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
     }
+    
+    .toolbar-center { width: 100%; }
+    .upload-controls { flex-direction: column; width: 100%; }
+    input[type="text"] { width: 100%; }
+    
+    button { width: 100%; padding: 15px; font-size: 15px; }
 
-    .upload-controls {
-        flex-direction: column;
-        width: 100%;
-    }
+    .sidebar-panel { position: relative; width: 100%; height: 250px; border-left: none; border-top: 1px solid var(--panel-border); margin-bottom: 0; }
+    .ai-avatar { font-size: 60px; padding: 15px; }
+    .avatar-pulse { width: 110px; height: 110px; }
+}
 
-    input[type="text"] {
-        width: 100%; /* The GitHub field takes the screen width*/
-    }
+/* =========================================
+   History Modal Styles
+   ========================================= */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 100; 
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0, 0, 0, 0.85); 
+    backdrop-filter: blur(5px);
+}
 
-    button {
-        width: 100%; /* The buttons should be wide for easy pressing with a finger*/
-        padding: 15px; /* Enlarge the button a little for the mobile*/
-        font-size: 16px;
-    }
+.modal-content {
+    background-color: var(--sidebar-bg); 
+    margin: 5% auto; 
+    padding: 25px; 
+    border: 1px solid var(--accent-blue); 
+    width: 90%; 
+    max-width: 800px; 
+    border-radius: 12px; 
+    max-height: 85vh; 
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
 
-    /* 2. Edit the side panel (Logs & Scorecard) */
-    .sidebar-panel {
-        position: relative; /* Unpin on the right*/
-        width: 100%; /* Take the full width of the screen*/
-        height: 250px; /* Suitable length for the mobile*/
-        border-left: none;
-        border-top: 1px solid var(--panel-border);
-        margin-bottom: 0;
-    }
+.close-btn {
+    color: var(--text-secondary); 
+    float: right; 
+    font-size: 28px; 
+    font-weight: bold; 
+    cursor: pointer;
+    transition: 0.2s;
+}
 
-    /* 3. Reduce the size of the Avatar a little to save space*/
-    .ai-avatar {
-        font-size: 60px;
-        padding: 15px;
-    }
+.close-btn:hover { color: var(--accent-red); }
 
-    .avatar-pulse {
-        width: 110px;
-        height: 110px;
-    }
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
+}
+
+/* =========================================
+   History Items (Collapsible / Accordion)
+   ========================================= */
+.history-item {
+    background: #111; 
+    margin-bottom: 15px; 
+    border-radius: 8px; 
+    border-left: 4px solid var(--agent-color); 
+    padding: 5px 15px;
+    transition: background 0.3s;
+}
+
+/* شكل الـ Header اللي بتضغط عليه */
+.history-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    cursor: pointer;
+    list-style: none; /* إخفاء السهم الافتراضي بتاع المتصفح */
+    outline: none;
+}
+/* إخفاء السهم الافتراضي في متصفحات Webkit (زي كروم وسفاري) */
+.history-summary::-webkit-details-marker { display: none; }
+
+.history-summary:hover {
+    opacity: 0.8;
+}
+
+/* السهم اللي ضفناه عشان يلف لما تفتح القائمة */
+.toggle-icon {
+    font-size: 12px;
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+}
+
+/* لما القائمة تتفتح (open)، السهم يلف 180 درجة */
+.history-item[open] .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.history-date { color: var(--text-secondary); font-size: 13px; }
+.history-persona { color: var(--accent-blue); font-weight: bold; font-size: 15px; }
+
+/* النص الكامل للتقييم (بيظهر بس لما تفتح القائمة) */
+.history-text {
+    white-space: pre-wrap; 
+    font-family: monospace; 
+    font-size: 13px; 
+    color: #ddd; 
+    background: rgba(255,255,255,0.03); 
+    padding: 15px; 
+    border-radius: 5px; 
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-top: 1px dashed #333; /* خط فاصل شيك بين العنوان والتفاصيل */
 }

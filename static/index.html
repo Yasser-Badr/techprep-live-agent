@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TechPrep Live Agent 🤖</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    </head>
+</head>
 <body class="zoom-theme">
     
     <div class="app-container">
@@ -13,7 +13,14 @@
         <main class="main-content">
             <div id="aiAvatarContainer" class="avatar-container">
                 <div class="avatar-pulse"></div>
-                <div class="ai-avatar">🤖</div>
+                <div class="ai-avatar" id="aiAvatarIcon">🤖</div>
+                <div id="waveform" class="waveform">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
                 <p id="aiStatusText">Waiting to start...</p>
             </div>
 
@@ -31,14 +38,26 @@
         </aside>
 
         <footer class="bottom-toolbar">
+            <div class="persona-container" style="margin-right: 15px; display: flex; align-items: center; gap: 10px;">
+            <select id="personaSelect" class="persona-dropdown">
+                <option value="senior-tech-lead">👔 Senior Tech Lead</option>
+                <option value="technical-interviewer">🔍 Strict Interviewer</option>
+                <option value="code-reviewer">📝 Code Reviewer</option>
+                <option value="frontend-lead">🎨 Frontend Lead</option>
+            </select>
+            <button id="historyBtn" class="btn-secondary" style="padding: 8px 12px;">📜 History</button>
+            </div>
+            
             <div class="toolbar-left">
                 <button id="startBtn" class="btn-start">🎤 Start Call</button>
+                <button id="pauseMicBtn" class="btn-secondary" disabled>⏸️ Pause Mic</button>
+                <button id="muteAiBtn" class="btn-secondary" disabled>🔇 Mute AI</button>
                 <button id="stopBtn" class="btn-stop" disabled>🛑 End Call</button>
             </div>
             
             <div class="toolbar-center">
                 <div id="fileUploadSection" class="upload-controls">
-                    <input type="text" id="githubUrl" placeholder="Paste GitHub file URL...">
+                    <input type="text" id="githubUrl" placeholder="Paste GitHub file or Repo URL...">
                     <button id="fetchGithubBtn" class="btn-github">Fetch GitHub</button>
                     <span class="divider">OR</span>
                     <input type="file" id="codeFileInput" accept=".go,.js,.py,.html,.css,.json,.txt">
@@ -47,7 +66,13 @@
             </div>
         </footer>
     </div>
-
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeHistoryBtn">&times;</span>
+            <h2 style="margin-top: 0; color: #00ffcc;">📜 Interview History</h2>
+            <div id="historyList"></div>
+        </div>
+    </div>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

@@ -28,7 +28,7 @@ func main() {
 
 	// 3. Define routing
 	http.HandleFunc("/ws", wsHandler.HandleConnections)
-	http.HandleFunc("/api/github", apiHandler.HandleGitHubFetch)
+	http.HandleFunc("/api/github", apiHandler.HandleGitHubFetchV2)
 	http.HandleFunc("/api/evaluate", apiHandler.HandleEvaluate)
 
 	// Serve static files (HTML, CSS, JS) cleanly

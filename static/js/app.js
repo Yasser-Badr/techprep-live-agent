@@ -1,3 +1,4 @@
+
 // --- DOM Elements ---
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -13,11 +14,20 @@ const codeDisplay = document.getElementById('codeDisplay');
 const scorecard = document.getElementById('scorecard');
 const scorecardContent = document.getElementById('scorecardContent');
 
-// --- New DOM Elements for Avatar & Layout ---
+// --- Avatar & Controls ---
 const aiAvatarContainer = document.getElementById('aiAvatarContainer');
+const aiAvatarIcon = document.getElementById('aiAvatarIcon');
 const aiStatusText = document.getElementById('aiStatusText');
 const sidebar = document.getElementById('sidebar');
 const toolbarCenter = document.querySelector('.toolbar-center');
+const waveform = document.getElementById('waveform');
+const pauseMicBtn = document.getElementById('pauseMicBtn');
+const muteAiBtn = document.getElementById('muteAiBtn');
+// --- history ---
+const historyBtn = document.getElementById('historyBtn');
+const historyModal = document.getElementById('historyModal');
+const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+const historyList = document.getElementById('historyList');
 
 // --- State Variables ---
 let ws;
@@ -27,13 +37,15 @@ let inputCtx;
 let processor;
 let nextPlayTime = 0;
 let sharedCodeContext = "";
+let isMicPaused = false;
+let isAiMuted = false;
+let avatarAnimationTimeout;
 
 function logToChat(message) {
     chatBox.innerHTML += `> ${message}<br>`;
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// 💡 Edit here: The resetUI function no longer hides the rating!
 function resetUI() {
     if (micStream) micStream.getTracks().forEach(track => track.stop());
     if (processor) processor.disconnect();
@@ -42,6 +54,18 @@ function resetUI() {
 
     startBtn.disabled = false;
     stopBtn.disabled = true;
+    pauseMicBtn.disabled = true;
+    muteAiBtn.disabled = true;
+
+    // Reset buttons state
+    isMicPaused = false;
+    isAiMuted = false;
+    pauseMicBtn.innerText = "⏸️ Pause Mic";
+    pauseMicBtn.style.borderColor = "";
+    pauseMicBtn.style.color = "white";
+    muteAiBtn.innerText = "🔇 Mute AI";
+    muteAiBtn.style.borderColor = "";
+    muteAiBtn.style.color = "white";
 
     toolbarCenter.style.display = "none";
     codeViewerSection.style.display = "none";
@@ -49,14 +73,15 @@ function resetUI() {
     codeFileInput.value = "";
     githubUrlInput.value = "";
 
-    // Return the Avatar and zero its status
+    // Reset Avatar
     aiAvatarContainer.style.display = "flex";
     aiAvatarContainer.classList.remove('speaking');
+    aiAvatarIcon.classList.remove('speaking-animation');
+    waveform.classList.remove('active');
+    clearTimeout(avatarAnimationTimeout);
+
     aiStatusText.innerText = "Call ended ❌. Start new call?";
     aiStatusText.style.color = "#aaa";
-
-    //Note: We did not hide the Sidebar and Scorecard so you can read the review
-
 }
 
 startBtn.onclick = async () => {
@@ -67,20 +92,23 @@ startBtn.onclick = async () => {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
         nextPlayTime = audioCtx.currentTime;
 
+        const selectedPersona = document.getElementById('personaSelect').value;
         const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        ws = new WebSocket(wsProtocol + window.location.host + '/ws');
-        
+        ws = new WebSocket(wsProtocol + window.location.host + '/ws?persona=' + selectedPersona);
+
         ws.onopen = () => {
             aiStatusText.innerText = "Connected! Tech Lead is listening 🎤";
             aiStatusText.style.color = "#00ffcc";
 
             startBtn.disabled = true;
             stopBtn.disabled = false;
+            pauseMicBtn.disabled = false;
+            muteAiBtn.disabled = false;
+            
             toolbarCenter.style.display = "flex";
             sidebar.style.display = "flex";
-            
-            // 💡 Hide the old rating only when you start a new call
-            scorecard.style.display = "none"; 
+
+            scorecard.style.display = "none";
             sharedCodeContext = "No code shared. General technical discussion.";
 
             logToChat("Connected! Start speaking or optionally share code.");
@@ -113,34 +141,61 @@ startBtn.onclick = async () => {
 
 stopBtn.onclick = async () => {
     logToChat("🛑 Ending session...");
-
-    // 💡 Show the evaluation screen immediately and prepare it before the call hangs up
     sidebar.style.display = "flex";
     scorecard.style.display = "block";
 
     if (sharedCodeContext === "No code shared. General technical discussion." || sharedCodeContext.trim() === "") {
-        scorecardContent.innerHTML = `<span style="color: #aaa; font-style: italic;">No code was shared during this session. Only general technical discussion took place.</span>`;
+        scorecardContent.innerHTML = `<span style="color: #aaa; font-style: italic;">No code was shared. Only general technical discussion took place.</span>`;
     } else {
         scorecardContent.innerHTML = "<i>Analyzing architecture and code quality... Please wait.</i>";
         try {
-            const response = await fetch('/api/evaluate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code_context: sharedCodeContext })
-            });
-            const data = await response.json();
-            scorecardContent.innerHTML = `<pre style="white-space: pre-wrap; color: #fff; background: transparent; border: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${data.evaluation}</pre>`;
-        } catch (error) {
-            scorecardContent.innerText = "Error generating scorecard.";
-        }
-    }
+        const response = await fetch('/api/evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code_context: sharedCodeContext })
+        });
+        const data = await response.json();
+        scorecardContent.innerHTML = `<pre style="white-space: pre-wrap; color: #fff; background: transparent; border: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${data.evaluation}</pre>`;
 
-    // Close the connection after we have prepared the evaluation screen
+        //   حفظ النتيجة في الهيستوري بعد نجاح التقييم
+        const selectedPersonaName = document.getElementById('personaSelect').options[document.getElementById('personaSelect').selectedIndex].text;
+        saveScorecardToHistory(selectedPersonaName, data.evaluation);
+
+    } catch (error) {
+        scorecardContent.innerText = "Error generating scorecard.";
+    }
+}
+
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.close(1000, "Interview ended by user");
     } else {
         resetUI();
     }
+};
+
+// --- Mute & Pause Controls ---
+pauseMicBtn.onclick = () => {
+    isMicPaused = !isMicPaused;
+    if (micStream && micStream.getAudioTracks().length > 0) {
+        micStream.getAudioTracks()[0].enabled = !isMicPaused;
+    }
+    pauseMicBtn.innerText = isMicPaused ? "▶️ Resume Mic" : "⏸️ Pause Mic";
+    pauseMicBtn.style.borderColor = isMicPaused ? "#ffaa00" : "#0037ff";
+    pauseMicBtn.style.color = isMicPaused ? "#ffaa00" : "#4c00ff";
+};
+
+muteAiBtn.onclick = () => {
+    isAiMuted = !isAiMuted;
+    if (audioCtx) {
+        if (isAiMuted) {
+            audioCtx.suspend();
+        } else {
+            audioCtx.resume();
+        }
+    }
+    muteAiBtn.innerText = isAiMuted ? "🔊 Unmute AI" : "🔇 Mute AI";
+    muteAiBtn.style.borderColor = isAiMuted ? "#ffaa00" : "#0037ff";
+    muteAiBtn.style.color = isAiMuted ? "#ffaa00" : "#0c10ff";
 };
 
 fetchGithubBtn.onclick = async () => {
@@ -226,15 +281,65 @@ async function playPCMAudio(base64) {
     source.buffer = buffer;
     source.connect(audioCtx.destination);
 
+    // 💡 تشغيل الـ Animations لما الـ AI يتكلم
     aiAvatarContainer.classList.add('speaking');
+    aiAvatarIcon.classList.add('speaking-animation');
+    waveform.classList.add('active');
 
     if (nextPlayTime < audioCtx.currentTime) nextPlayTime = audioCtx.currentTime;
     source.start(nextPlayTime);
     nextPlayTime += buffer.duration;
 
-    setTimeout(() => {
+    // 💡 إيقاف الـ Animations بعد ما يسكت
+    clearTimeout(avatarAnimationTimeout);
+    avatarAnimationTimeout = setTimeout(() => {
         if (nextPlayTime <= audioCtx.currentTime + 0.1) {
             aiAvatarContainer.classList.remove('speaking');
+            aiAvatarIcon.classList.remove('speaking-animation');
+            waveform.classList.remove('active');
         }
     }, (nextPlayTime - audioCtx.currentTime) * 1000 + 100);
 }
+
+
+// فتح وقفل المودال
+historyBtn.onclick = () => {
+    renderHistory();
+    historyModal.style.display = 'block';
+};
+closeHistoryBtn.onclick = () => { historyModal.style.display = 'none'; };
+window.onclick = (event) => { if (event.target == historyModal) historyModal.style.display = 'none'; };
+
+// حفظ التقييم في الـ LocalStorage
+function saveScorecardToHistory(personaName, evaluationText) {
+    let history = JSON.parse(localStorage.getItem('techprep_history')) || [];
+    const newRecord = {
+        id: Date.now(),
+        date: new Date().toLocaleString(),
+        persona: personaName,
+        evaluation: evaluationText
+    };
+    history.unshift(newRecord); // ضيف الأحدث في الأول
+    localStorage.setItem('techprep_history', JSON.stringify(history));
+}
+
+// عرض التقييمات (بنظام القائمة القابلة للطي)
+    function renderHistory() {
+        let history = JSON.parse(localStorage.getItem('techprep_history')) || [];
+        if (history.length === 0) {
+            historyList.innerHTML = '<p style="color: #aaa; text-align: center;">No interview history found yet. Start a call!</p>';
+            return;
+        }
+        historyList.innerHTML = history.map(item => `
+            <details class="history-item">
+                <summary class="history-summary">
+                    <span class="history-persona">${item.persona}</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="history-date">📅 ${item.date}</span>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                </summary>
+                <div class="history-text">${item.evaluation}</div>
+            </details>
+        `).join('');
+    }

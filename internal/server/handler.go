@@ -28,6 +28,9 @@ func NewWSHandler(apiKey string) *WSHandler {
 
 // HandleConnections upgrades the HTTP request and manages the bidi-streaming
 func (h *WSHandler) HandleConnections(w http.ResponseWriter, r *http.Request) {
+	// 1. استخراج الـ Persona من الرابط (أضف السطرين دول في بداية الدالة)
+	personaType := r.URL.Query().Get("persona")
+
 	// 1. Validate WebSocket Upgrade Headers
 	connHdr := r.Header.Get("Connection")
 	upgradeHdr := r.Header.Get("Upgrade")
@@ -54,7 +57,11 @@ func (h *WSHandler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 	defer aiClient.Close()
 	log.Println("✅ Go server connected to Gemini API")
 
-	if err := aiClient.InitializeSession(); err != nil {
+	// ... كود إنشاء الـ Agent ...
+	agent := agent.NewGeminiAgent()
+	agent.Connect(h.APIKey)
+
+	if err := aiClient.InitializeSession(personaType); err != nil {
 		log.Println("❌ Error initializing AI session:", err)
 		return
 	}

@@ -142,3 +142,68 @@ func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"evaluation": "AI returned an empty evaluation."})
 	}
 }
+
+// =====================================================================
+// VERSION 2: Full Repository Analysis OR Single File (Smart Fetch)
+// =====================================================================
+// This version checks if the URL is a single file or a full repository.
+// If it's a full repo, it fetches the README.md to understand the architecture.
+func (h *APIHandler) HandleGitHubFetchV2(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		URL string `json:"url"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	urlStr := req.URL
+	var finalContext string
+
+	// Condition 1: Check if it's a single file (URL contains "/blob/")
+	if strings.Contains(urlStr, "/blob/") {
+		// Convert normal GitHub URL to Raw content URL
+		rawURL := strings.Replace(urlStr, "github.com", "raw.githubusercontent.com", 1)
+		rawURL = strings.Replace(rawURL, "/blob/", "/", 1)
+
+		resp, err := http.Get(rawURL)
+		if err != nil || resp.StatusCode != 200 {
+			http.Error(w, "Failed to fetch single file from GitHub", http.StatusInternalServerError)
+			return
+		}
+		defer resp.Body.Close()
+		
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		finalContext = string(bodyBytes)
+
+	} else {
+		// Condition 2: It is a Full Repository URL (e.g., https://github.com/owner/repo)
+		// Extract owner and repo name from the URL
+		urlParts := strings.Split(strings.TrimPrefix(urlStr, "https://github.com/"), "/")
+		if len(urlParts) < 2 {
+			http.Error(w, "Invalid GitHub Repository URL", http.StatusBadRequest)
+			return
+		}
+		
+		owner := urlParts[0]
+		repo := strings.TrimSuffix(urlParts[1], ".git") // Remove .git if exists
+
+		// Fetch the README.md file as the primary architectural context
+		readmeURL := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/main/README.md", owner, repo)
+		resp, err := http.Get(readmeURL)
+		
+		readmeContent := "No README.md found in the main branch."
+		if err == nil && resp.StatusCode == 200 {
+			defer resp.Body.Close()
+			bodyBytes, _ := io.ReadAll(resp.Body)
+			readmeContent = string(bodyBytes)
+		}
+
+		// Inject instructions for the AI to review it as a full architecture
+		finalContext = fmt.Sprintf("Repository: %s/%s\n\n--- ARCHITECTURE & README ---\n%s\n\n[System Note: The candidate shared a full repository. Discuss the overall system design, project structure, and purpose based on this README.]", owner, repo, readmeContent)
+	}
+
+	// Return the formatted context back to the frontend
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"code": finalContext})
+}
