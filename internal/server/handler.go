@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Yasser-Bader/techprep-live-agent/internal/agent" // Make sure this matches your module name
+	"github.com/Yasser-Badr/techprep-live-agent/internal/agent" // Make sure this matches your module name
 
 	"github.com/gorilla/websocket"
 )
@@ -28,7 +28,7 @@ func NewWSHandler(apiKey string) *WSHandler {
 
 // HandleConnections upgrades the HTTP request and manages the bidi-streaming
 func (h *WSHandler) HandleConnections(w http.ResponseWriter, r *http.Request) {
-	// 1. استخراج الـ Persona من الرابط (أضف السطرين دول في بداية الدالة)
+	// 1. Extract the Persona from the link (add these two lines at the beginning of the function)
 	personaType := r.URL.Query().Get("persona")
 
 	// 1. Validate WebSocket Upgrade Headers
@@ -57,7 +57,7 @@ func (h *WSHandler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 	defer aiClient.Close()
 	log.Println("✅ Go server connected to Gemini API")
 
-	// ... كود إنشاء الـ Agent ...
+	// ... Agent creation code ...
 	agent := agent.NewGeminiAgent()
 	agent.Connect(h.APIKey)
 

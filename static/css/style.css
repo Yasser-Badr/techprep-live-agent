@@ -1,4 +1,3 @@
-/* --- Zoom-like Dark Theme & Eye Comfort Palette --- */
 :root {
     --bg-color: #1a1e26;       
     --main-bg: #11141a;        
@@ -205,7 +204,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; max-width: 2
     .persona-container { margin-right: 0 !important; width: 100%; }
     .persona-dropdown { width: 100%; padding: 12px; font-size: 16px; }
 
-    /* شبكة زراير 2x2 على الموبايل لشكل أشيك */
+    /* A 2x2 grid of buttons on the mobile phone for an elegant look*/
     .toolbar-left {
         width: 100%;
         display: grid;
@@ -224,8 +223,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; max-width: 2
     .avatar-pulse { width: 110px; height: 110px; }
 }
 
-/* =========================================
-   History Modal Styles
+  /* History Modal Styles
    ========================================= */
 .modal {
     display: none; 
@@ -271,8 +269,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; max-width: 2
     padding-bottom: 8px;
 }
 
-/* =========================================
-   History Items (Collapsible / Accordion)
+/*   History Items (Collapsible / Accordion)
    ========================================= */
 .history-item {
     background: #111; 
@@ -283,31 +280,30 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; max-width: 2
     transition: background 0.3s;
 }
 
-/* شكل الـ Header اللي بتضغط عليه */
 .history-summary {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
     cursor: pointer;
-    list-style: none; /* إخفاء السهم الافتراضي بتاع المتصفح */
+    list-style: none; 
     outline: none;
 }
-/* إخفاء السهم الافتراضي في متصفحات Webkit (زي كروم وسفاري) */
+/* Hide the default arrow in Webkit browsers (such as Chrome and Safari) */
 .history-summary::-webkit-details-marker { display: none; }
 
 .history-summary:hover {
     opacity: 0.8;
 }
 
-/* السهم اللي ضفناه عشان يلف لما تفتح القائمة */
+
 .toggle-icon {
     font-size: 12px;
     color: var(--text-secondary);
     transition: transform 0.3s ease;
 }
 
-/* لما القائمة تتفتح (open)، السهم يلف 180 درجة */
+/* When the menu opens, the arrow rotates 180 degrees*/
 .history-item[open] .toggle-icon {
     transform: rotate(180deg);
 }
@@ -315,7 +311,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; max-width: 2
 .history-date { color: var(--text-secondary); font-size: 13px; }
 .history-persona { color: var(--accent-blue); font-weight: bold; font-size: 15px; }
 
-/* النص الكامل للتقييم (بيظهر بس لما تفتح القائمة) */
+/* The full text of the evaluation (it appears only when you open the list)*/
 .history-text {
     white-space: pre-wrap; 
     font-family: monospace; 
@@ -326,5 +322,51 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; max-width: 2
     border-radius: 5px; 
     margin-top: 10px;
     margin-bottom: 10px;
-    border-top: 1px dashed #333; /* خط فاصل شيك بين العنوان والتفاصيل */
+    border-top: 1px dashed #333; /* A check dividing line between the title and the details*/
+}
+
+/* =========================================
+   Custom Job Description Panel
+   ========================================= */
+.job-desc-panel {
+    background-color: var(--toolbar-bg);
+    border-top: 1px solid var(--panel-border);
+    padding: 15px 25px;
+    display: none; /* It will appear in JavaScript when the function is selected*/
+    flex-shrink: 0;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.jd-header {
+    color: var(--agent-color);
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+#jobDescInput {
+    width: 100%;
+    height: 80px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #111;
+    color: var(--text-primary);
+    border: 1px solid var(--accent-blue);
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#jobDescInput:focus {
+    border-color: var(--agent-color);
+    box-shadow: 0 0 8px rgba(0, 255, 204, 0.2);
 }

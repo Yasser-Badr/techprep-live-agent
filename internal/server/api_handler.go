@@ -2,13 +2,16 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os/exec"
 	"strings"
 	"sync"
+	"time"
 )
 
 type CodeFetcher interface {
@@ -96,7 +99,7 @@ func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := http.Post(geminiURL, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		log.Printf("❌ Failed to reach Gemini API: %v", err)
+		log.Printf(" Failed to reach Gemini API: %v", err)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"evaluation": "Failed to connect to AI server."})
 		return
@@ -107,7 +110,7 @@ func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 
 	// If Google rejects the request for any reason, we will print the reason in the Terminal so we know it
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("❌ Gemini API Error: %s", string(bodyBytes))
+		log.Printf(" Gemini API Error: %s", string(bodyBytes))
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"evaluation": "AI Evaluation failed. Please check the terminal logs for details."})
 		return
@@ -126,7 +129,7 @@ func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 
 	var result GeminiResponse
 	if err := json.Unmarshal(bodyBytes, &result); err != nil {
-		log.Printf("❌ Error parsing JSON: %v", err)
+		log.Printf(" Error parsing JSON: %v", err)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"evaluation": "Could not parse evaluation format."})
 		return
@@ -143,7 +146,6 @@ func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// =====================================================================
 // VERSION 2: Full Repository Analysis OR Single File (Smart Fetch)
 // =====================================================================
 // This version checks if the URL is a single file or a full repository.
@@ -172,7 +174,7 @@ func (h *APIHandler) HandleGitHubFetchV2(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		defer resp.Body.Close()
-		
+
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		finalContext = string(bodyBytes)
 
@@ -184,14 +186,14 @@ func (h *APIHandler) HandleGitHubFetchV2(w http.ResponseWriter, r *http.Request)
 			http.Error(w, "Invalid GitHub Repository URL", http.StatusBadRequest)
 			return
 		}
-		
+
 		owner := urlParts[0]
 		repo := strings.TrimSuffix(urlParts[1], ".git") // Remove .git if exists
 
 		// Fetch the README.md file as the primary architectural context
 		readmeURL := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/main/README.md", owner, repo)
 		resp, err := http.Get(readmeURL)
-		
+
 		readmeContent := "No README.md found in the main branch."
 		if err == nil && resp.StatusCode == 200 {
 			defer resp.Body.Close()
@@ -206,4 +208,48 @@ func (h *APIHandler) HandleGitHubFetchV2(w http.ResponseWriter, r *http.Request)
 	// Return the formatted context back to the frontend
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"code": finalContext})
+}
+
+// VERSION 4: Secure Live Code Execution (Dockerized Sandbox)
+// =====================================================================
+func (h *APIHandler) HandleRunCode(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Code string `json:"code"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	// 1. Set a maximum execution time (5 seconds) to prevent Infinite Loops
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// 2. Prepare the Isolated Ephemeral Container
+	// We use golang:1.26-alpine for its high speed and small size
+	cmd := exec.CommandContext(ctx, "docker", "run", "--rm", "-i",
+		"--network", "none", // Complete isolation from the network (intrusion protection)
+		"--memory", "128m", // Maximum RAM
+		"--cpus", "0.5", // Maximum processor
+		"golang:1.26-alpine",                          // Operating environment
+		"sh", "-c", "cat > main.go && go run main.go", // Receive and run the code
+	)
+
+	// 3.Passing the code directly from memory without creating files on the server
+	cmd.Stdin = strings.NewReader(req.Code)
+
+	// 4.Execute the code and capture the output
+	output, err := cmd.CombinedOutput()
+	result := string(output)
+
+	// 5. Error handling (Timeout or Compilation Errors)
+	if ctx.Err() == context.DeadlineExceeded {
+		result = "System Error: Execution timed out. Code exceeded the 5-second limit or contained an infinite loop."
+	} else if err != nil {
+		result = "Compilation or Runtime Error:\n" + string(output)
+	}
+
+	// 6. Securely send the result to the front-end
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"output": result})
 }

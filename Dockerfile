@@ -1,4 +1,3 @@
-# ==========================================
 # Stage 1: Builder
 # ==========================================
 FROM golang:1.26-alpine AS builder
@@ -17,7 +16,6 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o techprep-app main.go
 
 
-# ==========================================
 # Stage 2: Production (Lightweight final image)
 # ==========================================
 FROM alpine:latest

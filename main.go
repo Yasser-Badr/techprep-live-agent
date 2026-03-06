@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Yasser-Bader/techprep-live-agent/internal/server" // Make sure this matches your go.mod module name
+	"github.com/Yasser-Badr/techprep-live-agent/internal/server" // Make sure this matches your go.mod module name
 
 	"github.com/joho/godotenv"
 )
@@ -30,6 +30,7 @@ func main() {
 	http.HandleFunc("/ws", wsHandler.HandleConnections)
 	http.HandleFunc("/api/github", apiHandler.HandleGitHubFetchV2)
 	http.HandleFunc("/api/evaluate", apiHandler.HandleEvaluate)
+	http.HandleFunc("/api/run", apiHandler.HandleRunCode)
 
 	// Serve static files (HTML, CSS, JS) cleanly
 	fs := http.FileServer(http.Dir("./static"))
@@ -44,9 +45,3 @@ func main() {
 	log.Fatal(http.ListenAndServe(port, nil))
 }
 
-//34.235.124.79
-
-// sudo snap install core
-// sudo snap refresh core
-// sudo snap install --classic certbot
-// sudo ln -s /snap/bin/certbot /usr/bin/certbot

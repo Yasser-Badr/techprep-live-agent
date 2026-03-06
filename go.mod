@@ -1,4 +1,4 @@
-module github.com/Yasser-Bader/techprep-live-agent
+module github.com/Yasser-Badr/techprep-live-agent
 
 go 1.26.0
 

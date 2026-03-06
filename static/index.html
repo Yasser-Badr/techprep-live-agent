@@ -36,16 +36,28 @@
                 <div id="scorecardContent">Evaluation will appear here...</div>
             </div>
         </aside>
+        
+            <div id="jobDescPanel" class="job-desc-panel">
+            <div class="jd-header">
+                <span>🏢 Custom Job Interview Setup</span>
+            </div>
+            <textarea id="jobDescInput" placeholder="Paste the exact Job Description here...  TechPrep will tailor the interview to these requirements."></textarea>
+            </div>
 
         <footer class="bottom-toolbar">
-            <div class="persona-container" style="margin-right: 15px; display: flex; align-items: center; gap: 10px;">
-            <select id="personaSelect" class="persona-dropdown">
-                <option value="senior-tech-lead">👔 Senior Tech Lead</option>
-                <option value="technical-interviewer">🔍 Strict Interviewer</option>
-                <option value="code-reviewer">📝 Code Reviewer</option>
-                <option value="frontend-lead">🎨 Frontend Lead</option>
-            </select>
-            <button id="historyBtn" class="btn-secondary" style="padding: 8px 12px;">📜 History</button>
+            <div class="persona-container" style="margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="personaSelect" style="color: #ccc; font-weight: bold;">Choose Interviewer:</label>
+                    <select id="personaSelect" style="padding: 10px; border-radius: 5px; background: #2c2f33; color: white; border: 1px solid #7289da; font-size: 16px; outline: none; cursor: pointer;">
+                        <option value="senior-tech-lead">👔 Senior Tech Lead</option>
+                        <option value="technical-interviewer">🔍 Strict Interviewer</option>
+                        <option value="code-reviewer">📝 Code Reviewer</option>
+                        <option value="frontend-lead">🎨 Frontend Lead</option>
+                        <option value="custom-job">🏢 Custom Job (Paste JD)</option>
+                    </select>
+                    <button id="historyBtn" class="btn-secondary" style="padding: 8px 12px;">📜 History</button>
+
+                </div>
             </div>
             
             <div class="toolbar-left">
@@ -58,6 +70,7 @@
             <div class="toolbar-center">
                 <div id="fileUploadSection" class="upload-controls">
                     <input type="text" id="githubUrl" placeholder="Paste GitHub file or Repo URL...">
+                    <button id="runCodeBtn" class="btn-start" style="background-color: #f39c12;">▶️ Run Code</button>
                     <button id="fetchGithubBtn" class="btn-github">Fetch GitHub</button>
                     <span class="divider">OR</span>
                     <input type="file" id="codeFileInput" accept=".go,.js,.py,.html,.css,.json,.txt">

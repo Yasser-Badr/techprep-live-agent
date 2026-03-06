@@ -4,9 +4,9 @@ import (
 	"testing"
 )
 
-// TestPersonaSelection يختبر أن قاموس الشخصيات يحتوي على الشخصيات الأساسية
+// TestPersonaSelection Tests that the character dictionary contains the basic characters
 func TestPersonaSelection(t *testing.T) {
-	// 1. التأكد من وجود شخصية Senior Tech Lead (الافتراضية)
+	// 1. Ensure that the (default) Senior Tech Lead character is present
 	text, exists := AvailablePersonas["senior-tech-lead"]
 	if !exists {
 		t.Errorf("Expected 'senior-tech-lead' persona to exist")
@@ -15,7 +15,7 @@ func TestPersonaSelection(t *testing.T) {
 		t.Errorf("Expected 'senior-tech-lead' prompt to not be empty")
 	}
 
-	// 2. التأكد من إنشاء הـ Agent بنجاح
+	// 2. Ensure that the Agent was created successfully
 	agent := NewGeminiAgent()
 	if agent == nil {
 		t.Errorf("Expected NewGeminiAgent to return a valid instance, got nil")

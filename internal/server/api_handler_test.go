@@ -7,24 +7,24 @@ import (
 	"testing"
 )
 
-// TestHandleGitHubFetch_InvalidPayload يختبر حماية السيرفر من البيانات الخاطئة
+// TestHandleGitHubFetch_InvalidPayload Tests the server's protection against incorrect data
 func TestHandleGitHubFetch_InvalidPayload(t *testing.T) {
-	// إنشاء نسخة وهمية من الـ Handler
+	// Create a fake copy of the Handler
 	handler := NewAPIHandler("dummy_api_key")
 
-	// إرسال JSON خاطئ (مكسور)
+	// Sending wrong JSON (broken)
 	req, err := http.NewRequest("POST", "/api/github", bytes.NewBuffer([]byte(`{invalid_json}`)))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// تسجيل الرد
+	// Register reply
 	rr := httptest.NewRecorder()
 
-	// استدعاء الدالة
+	// Call function
 	handler.HandleGitHubFetch(rr, req)
 
-	// التأكد أن السيرفر رد بـ 400 Bad Request ولم ينهار (No Panic)
+	//Ensure that the server responded with 400 Bad Request and did not crash (No Panic)
 	if status := rr.Code; status != http.StatusBadRequest {
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusBadRequest)
 	}

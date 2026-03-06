@@ -29,6 +29,19 @@ const historyModal = document.getElementById('historyModal');
 const closeHistoryBtn = document.getElementById('closeHistoryBtn');
 const historyList = document.getElementById('historyList');
 
+const personaSelect = document.getElementById('personaSelect');
+const jobDescInput = document.getElementById('jobDescInput');
+const jobDescPanel = document.getElementById('jobDescPanel'); 
+
+// Show and hide the JD panel based on selection
+personaSelect.addEventListener('change', (e) => {
+    if (e.target.value === 'custom-job') {
+        jobDescPanel.style.display = 'block'; 
+    } else {
+        jobDescPanel.style.display = 'none';
+    }
+});
+
 // --- State Variables ---
 let ws;
 let micStream;
@@ -85,6 +98,19 @@ function resetUI() {
 }
 
 startBtn.onclick = async () => {
+    const selectedPersona = personaSelect.value;
+
+    //  Forced entry of job description
+    if (selectedPersona === 'custom-job') {
+        const jdText = jobDescInput.value.trim();
+        if (jdText === "") {
+            // If the box is empty, we will receive an alert and direct the mouse to the box
+            alert("⚠️ Please paste the exact Job Description first so the TechPrep can tailor the interview!");
+            jobDescInput.focus(); 
+            return; // The return stops the function and does not allow the microphone to open or the server to start
+        }
+    }
+
     try {
         aiStatusText.innerText = "Requesting microphone permission...";
         micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -102,16 +128,43 @@ startBtn.onclick = async () => {
 
             startBtn.disabled = true;
             stopBtn.disabled = false;
+
             pauseMicBtn.disabled = false;
             muteAiBtn.disabled = false;
             
-            toolbarCenter.style.display = "flex";
+            if (selectedPersona === 'custom-job'){
+                toolbarCenter.style.display = "none"; 
+            } else {
+                toolbarCenter.style.display = "flex";
+            }
             sidebar.style.display = "flex";
 
             scorecard.style.display = "none";
             sharedCodeContext = "No code shared. General technical discussion.";
 
             logToChat("Connected! Start speaking or optionally share code.");
+             //  Injection Logic for Custom Job Description
+            if (selectedPersona === 'custom-job') {
+                const jdText = jobDescInput.value.trim();
+                if (jdText !== "") {
+                    const msg = {
+                        clientContent: {
+                            turns: [{
+                                role: "user",
+                                parts: [{ text: `[System Note: I am applying for a job. You are the Hiring Manager. Here is the exact Job Description:\n\n${jdText}\n\nPlease start the interview immediately by welcoming me and asking the first question based on these specific requirements.]` }]
+                            }],
+                            turnComplete: true
+                        }
+                    };
+                    ws.send(JSON.stringify(msg));
+                    logToChat("📄 Custom Job Description injected successfully!");
+                    //  Hide the panel after starting the call so we can enjoy the screen
+                    jobDescPanel.style.display = 'none';
+                } else {
+                    logToChat("⚠️ Warning: No job description provided. AI will ask general questions.");
+                }
+            }
+
             startMicCapture();
         };
 
@@ -201,7 +254,7 @@ muteAiBtn.onclick = () => {
 fetchGithubBtn.onclick = async () => {
     const url = githubUrlInput.value;
     if (!url.includes("github.com")) return alert("Please enter a valid GitHub file URL");
-    logToChat("🐙 Fetching code from GitHub...");
+    logToChat("Fetching code from GitHub...");
     try {
         const response = await fetch('/api/github', {
             method: 'POST',
@@ -281,7 +334,7 @@ async function playPCMAudio(base64) {
     source.buffer = buffer;
     source.connect(audioCtx.destination);
 
-    // 💡 تشغيل الـ Animations لما الـ AI يتكلم
+    // Play animations when the AI ​​speaks
     aiAvatarContainer.classList.add('speaking');
     aiAvatarIcon.classList.add('speaking-animation');
     waveform.classList.add('active');
@@ -290,7 +343,6 @@ async function playPCMAudio(base64) {
     source.start(nextPlayTime);
     nextPlayTime += buffer.duration;
 
-    // 💡 إيقاف الـ Animations بعد ما يسكت
     clearTimeout(avatarAnimationTimeout);
     avatarAnimationTimeout = setTimeout(() => {
         if (nextPlayTime <= audioCtx.currentTime + 0.1) {
@@ -302,7 +354,7 @@ async function playPCMAudio(base64) {
 }
 
 
-// فتح وقفل المودال
+// Opening and closing the module
 historyBtn.onclick = () => {
     renderHistory();
     historyModal.style.display = 'block';
@@ -310,7 +362,7 @@ historyBtn.onclick = () => {
 closeHistoryBtn.onclick = () => { historyModal.style.display = 'none'; };
 window.onclick = (event) => { if (event.target == historyModal) historyModal.style.display = 'none'; };
 
-// حفظ التقييم في الـ LocalStorage
+// Save the evaluation in LocalStorage
 function saveScorecardToHistory(personaName, evaluationText) {
     let history = JSON.parse(localStorage.getItem('techprep_history')) || [];
     const newRecord = {
@@ -319,11 +371,11 @@ function saveScorecardToHistory(personaName, evaluationText) {
         persona: personaName,
         evaluation: evaluationText
     };
-    history.unshift(newRecord); // ضيف الأحدث في الأول
+    history.unshift(newRecord); // Guest the latest in the first
     localStorage.setItem('techprep_history', JSON.stringify(history));
 }
 
-// عرض التقييمات (بنظام القائمة القابلة للطي)
+// View ratings (collapsible menu system)
     function renderHistory() {
         let history = JSON.parse(localStorage.getItem('techprep_history')) || [];
         if (history.length === 0) {
@@ -343,3 +395,48 @@ function saveScorecardToHistory(personaName, evaluationText) {
             </details>
         `).join('');
     }
+
+    const runCodeBtn = document.getElementById('runCodeBtn');
+
+runCodeBtn.onclick = async () => {
+    
+    const codeToRun = sharedCodeContext; 
+    
+    if (!codeToRun || codeToRun.trim() === "" || codeToRun.includes("No code shared")) {
+        alert("Please fetch or upload Go code first!");
+        return;
+    }
+
+    logToChat("⚙️ Running code in isolated sandbox...");
+    
+    try {
+        const response = await fetch('/api/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: codeToRun })
+        });
+        
+        const data = await response.json();
+        const executionOutput = data.output;
+        
+        logToChat(`🖥️ Output: ${executionOutput}`);
+
+        // Send the result to the AI ​​so that it can discuss it with you via audio!
+        const msg = {
+            clientContent: {
+                turns: [{
+                    role: "user",
+                    parts: [{ text: `[System Note: The user just executed the code. Here is the actual terminal output:\n\n${executionOutput}\n\nPlease review this output audibly. Tell the user what happened, and if there is an error, guide them on how to fix it.]` }]
+                }],
+                turnComplete: true
+            }
+        };
+
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(msg));
+        }
+
+    } catch (e) {
+        logToChat("❌ Sandbox Execution Failed.");
+    }
+};
