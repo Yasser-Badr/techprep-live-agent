@@ -8,7 +8,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -210,7 +212,7 @@ func (h *APIHandler) HandleGitHubFetchV2(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(map[string]string{"code": finalContext})
 }
 
-// VERSION 4: Secure Live Code Execution (Dockerized Sandbox)
+// VERSION 4: Secure Live Code Execution
 // =====================================================================
 func (h *APIHandler) HandleRunCode(w http.ResponseWriter, r *http.Request) {
 	var req struct {
@@ -221,35 +223,32 @@ func (h *APIHandler) HandleRunCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 1. Set a maximum execution time (5 seconds) to prevent Infinite Loops
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// Very sufficient time for implementation
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	// 2. Prepare the Isolated Ephemeral Container
-	// We use golang:1.26-alpine for its high speed and small size
-	cmd := exec.CommandContext(ctx, "docker", "run", "--rm", "-i",
-		"--network", "none", // Complete isolation from the network (intrusion protection)
-		"--memory", "128m", // Maximum RAM
-		"--cpus", "0.5", // Maximum processor
-		"golang:1.26-alpine",                          // Operating environment
-		"sh", "-c", "cat > main.go && go run main.go", // Receive and run the code
-	)
+	tmpDir, err := os.MkdirTemp("", "sandbox_*")
+	if err != nil {
+		http.Error(w, "Failed to create sandbox", http.StatusInternalServerError)
+		return
+	}
+	defer os.RemoveAll(tmpDir)
 
-	// 3.Passing the code directly from memory without creating files on the server
-	cmd.Stdin = strings.NewReader(req.Code)
+	tmpFile := filepath.Join(tmpDir, "main.go")
+	os.WriteFile(tmpFile, []byte(req.Code), 0644)
 
-	// 4.Execute the code and capture the output
+	// Direct and fast operation
+	cmd := exec.CommandContext(ctx, "sh", "-c", "cd "+tmpDir+" && go run main.go")
+
 	output, err := cmd.CombinedOutput()
 	result := string(output)
 
-	// 5. Error handling (Timeout or Compilation Errors)
 	if ctx.Err() == context.DeadlineExceeded {
-		result = "System Error: Execution timed out. Code exceeded the 5-second limit or contained an infinite loop."
+		result = "System Error: Execution timed out (exceeded 15 seconds limit)."
 	} else if err != nil {
-		result = "Compilation or Runtime Error:\n" + string(output)
+		result = "Compilation/Runtime Error:\n" + string(output)
 	}
 
-	// 6. Securely send the result to the front-end
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"output": result})
 }

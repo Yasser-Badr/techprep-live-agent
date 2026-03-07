@@ -210,7 +210,7 @@ stopBtn.onclick = async () => {
         const data = await response.json();
         scorecardContent.innerHTML = `<pre style="white-space: pre-wrap; color: #fff; background: transparent; border: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${data.evaluation}</pre>`;
 
-        //   حفظ النتيجة في الهيستوري بعد نجاح التقييم
+        //   Save the result in the history after the evaluation is successful
         const selectedPersonaName = document.getElementById('personaSelect').options[document.getElementById('personaSelect').selectedIndex].text;
         saveScorecardToHistory(selectedPersonaName, data.evaluation);
 

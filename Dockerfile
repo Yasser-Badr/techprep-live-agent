@@ -18,7 +18,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o techprep-app main
 
 # Stage 2: Production (Lightweight final image)
 # ==========================================
-FROM alpine:latest
+FROM golang:1.26-alpine
 
 # Install security certificates to communicate with Google API and GitHub without SSL errors
 RUN apk --no-cache add ca-certificates tzdata

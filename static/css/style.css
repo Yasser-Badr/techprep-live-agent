@@ -325,8 +325,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; max-width: 2
     border-top: 1px dashed #333; /* A check dividing line between the title and the details*/
 }
 
-/* =========================================
-   Custom Job Description Panel
+/*   Custom Job Description Panel
    ========================================= */
 .job-desc-panel {
     background-color: var(--toolbar-bg);
