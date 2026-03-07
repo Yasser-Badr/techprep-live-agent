@@ -45,16 +45,16 @@ The easiest way for judges and developers to run this project is using Docker. I
 
  2. Set up Environment Variables:
    Create a .env file in the root directory and add your Gemini API Key:
-   GEMINI_API_KEY=your_actual_api_key_here
+  ` GEMINI_API_KEY=your_actual_api_key_here`
 
- 3. Build and Run with Docker Compose:
-   docker-compose up -d --build
+ 3. Build and Run with Docker Compose:`
+   docker-compose up -d --build`
 
  4. Access the Application:
    Open your browser and navigate to: http://localhost
    (Note: Browsers require HTTPS or localhost to allow microphone access. Running on localhost works perfectly for testing).
- 5. Stop the Application:
-   docker-compose down
+ 5. Stop the Application:`
+   docker-compose down`
 
 ## 🎮 How to Use (Demo Flow)
  1. Choose Your Setup: Select a predefined Persona (e.g., Senior Tech Lead) OR choose "Custom Job" and paste a real Job Description.
