@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -14,6 +13,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/google/generative-ai-go/genai"
+	"google.golang.org/api/option"
 )
 
 type CodeFetcher interface {
@@ -78,11 +80,24 @@ func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		CodeContext string `json:"code_context"`
 	}
-	json.NewDecoder(r.Body).Decode(&req)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
 
-	// Use the stable 2.5 text model
-	geminiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=%s", h.APIKey)
-
+	// ────────────────────────────────────────────────
+	//               Use Google GenAI SDK
+	// ────────────────────────────────────────────────
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(h.APIKey))
+	if err != nil {
+		log.Printf("Failed to create genai client: %v", err)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"evaluation": "Failed to initialize AI service."})
+		return
+	}
+	defer client.Close()
+	model := client.GenerativeModel("gemini-2.5-flash")
 	prompt := fmt.Sprintf(`You are an expert Backend Tech Lead. Evaluate the following code and provide a scorecard. 
 	Format as cleanly separated plain text (No Markdown bolding).
 	Include: 
@@ -92,60 +107,31 @@ func (h *APIHandler) HandleEvaluate(w http.ResponseWriter, r *http.Request) {
 	
 	Code context: %s`, req.CodeContext)
 
-	payload := map[string]interface{}{
-		"contents": []map[string]interface{}{
-			{"parts": []map[string]string{{"text": prompt}}},
-		},
-	}
-	jsonData, _ := json.Marshal(payload)
-
-	resp, err := http.Post(geminiURL, "application/json", bytes.NewBuffer(jsonData))
+	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
-		log.Printf(" Failed to reach Gemini API: %v", err)
+		log.Printf("Failed to reach Gemini API: %v", err)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"evaluation": "Failed to connect to AI server."})
 		return
 	}
-	defer resp.Body.Close()
 
-	bodyBytes, _ := io.ReadAll(resp.Body)
-
-	// If Google rejects the request for any reason, we will print the reason in the Terminal so we know it
-	if resp.StatusCode != http.StatusOK {
-		log.Printf(" Gemini API Error: %s", string(bodyBytes))
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"evaluation": "AI Evaluation failed. Please check the terminal logs for details."})
-		return
+	// Extract text in a safe and modern way
+	var evaluation string
+	if len(resp.Candidates) > 0 {
+		for _, part := range resp.Candidates[0].Content.Parts {
+			if t, ok := part.(genai.Text); ok {
+				evaluation += string(t)
+			}
+		}
 	}
 
-	// Read JSON in a structurally safe way to prevent Panics
-	type GeminiResponse struct {
-		Candidates []struct {
-			Content struct {
-				Parts []struct {
-					Text string `json:"text"`
-				} `json:"parts"`
-			} `json:"content"`
-		} `json:"candidates"`
+	// fallback if the response is empty
+	if evaluation == "" {
+		evaluation = "AI returned an empty evaluation."
 	}
 
-	var result GeminiResponse
-	if err := json.Unmarshal(bodyBytes, &result); err != nil {
-		log.Printf(" Error parsing JSON: %v", err)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"evaluation": "Could not parse evaluation format."})
-		return
-	}
-
-	// Extract the text and send it to the browser
-	if len(result.Candidates) > 0 && len(result.Candidates[0].Content.Parts) > 0 {
-		evaluationText := result.Candidates[0].Content.Parts[0].Text
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"evaluation": evaluationText})
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"evaluation": "AI returned an empty evaluation."})
-	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"evaluation": evaluation})
 }
 
 // VERSION 2: Full Repository Analysis OR Single File (Smart Fetch)

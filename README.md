@@ -20,12 +20,16 @@ TechPrep Live Agent is a real-time, voice-first AI companion built with Go and t
 ## 🏗️ Architecture
 * **Backend:** Go (Golang), Gorilla WebSockets.
 * **Frontend:** Vanilla JavaScript, Web Audio API, HTML5, CSS3.
-* **Infrastructure:** Docker, Docker Compose, Nginx, AWS EC2, GitHub Actions (CI/CD).
-* **AI Models:** Google Gemini Multimodal Live API (Audio) & Gemini 2.5 Flash API (Text).
+* **Infrastructure:** Docker, Docker Compose, Nginx, **Google Cloud Platform (GCP - Compute Engine)**, GitHub Actions (CI/CD).
 
-![TechPrep Architecture](assets/TechPrep_Diagram.jpg)
+### AI Integration:
+This dual-model approach leverages the strengths of the stable Gemini 2.5 Flash for reliable text-based analysis and the latest native audio preview for seamless, emotionally aware voice interactions.
+- **Scorecard / Text Evaluation**: Built using the official **Google GenAI SDK for Go** with the stable model **`gemini-2.5-flash`** (for secure, high-quality code analysis and feedback generation).
+- **Real-time Voice Conversation (Gemini Live)**: Powered by the **Gemini Live API** (bidirectional WebSocket) using the latest supported native audio preview model **`gemini-2.5-flash-native-audio-preview-12-2025`** (for ultra-low latency audio streaming, emotional tone, and natural conversation flow).
 
-*(Note: The diagram above illustrates the core routing architecture. The final deployed version has been upgraded to utilize `models/gemini-2.0-flash-exp` for enhanced stability, and includes an internal execution Sandbox connected to the Go Application for secure, real-time code execution).*
+![TechPrep Architecture](assets/TechPrep_diagram.jpg)
+
+*(Note: The diagram above illustrates the core routing architecture. The final deployed version has been upgraded to utilize `models/gemini-2.5-flash` for enhanced stability, uses the official GenAI SDK, and includes an internal execution Sandbox connected to the Go Application for secure, real-time code execution).*
 
 ---
 
