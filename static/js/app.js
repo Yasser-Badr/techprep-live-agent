@@ -93,6 +93,23 @@ function resetUI() {
     waveform.classList.remove('active');
     clearTimeout(avatarAnimationTimeout);
 
+     // إيقاف مشاركة الشاشة إذا كانت تعمل
+    if (typeof screenStream !== 'undefined' && screenStream !== null) {
+        screenStream.getTracks().forEach(track => track.stop());
+        screenStream = null;
+    }
+    if (typeof screenInterval !== 'undefined' && screenInterval !== null) {
+        clearInterval(screenInterval);
+        screenInterval = null;
+    }
+    const shareScreenBtn = document.getElementById('shareScreenBtn');
+    if (shareScreenBtn) {
+        shareScreenBtn.innerText = '📺 مشاركة الشاشة';
+        shareScreenBtn.style.borderColor = "";
+        shareScreenBtn.style.color = "white";
+        shareScreenBtn.disabled = true; // تعطيل الزر
+    }
+
     aiStatusText.innerText = "Call ended ❌. Start new call?";
     aiStatusText.style.color = "#aaa";
 }
@@ -131,6 +148,7 @@ startBtn.onclick = async () => {
 
             pauseMicBtn.disabled = false;
             muteAiBtn.disabled = false;
+            document.getElementById('shareScreenBtn').disabled = false;
             
             if (selectedPersona === 'custom-job'){
                 toolbarCenter.style.display = "none"; 
@@ -438,5 +456,85 @@ runCodeBtn.onclick = async () => {
 
     } catch (e) {
         logToChat("❌ Sandbox Execution Failed.");
+    }
+};
+
+// === ميزة مشاركة الشاشة (Screen Sharing) ===
+const shareScreenBtn = document.getElementById('shareScreenBtn');
+const screenVideo = document.getElementById('screen-video');
+const screenCanvas = document.getElementById('screen-canvas');
+const screenCtx = screenCanvas.getContext('2d');
+
+let screenStream = null;
+let screenInterval = null;
+
+shareScreenBtn.onclick = async () => {
+    // إذا كانت الشاشة قيد المشاركة، قم بإيقافها
+    if (screenStream) {
+        screenStream.getTracks().forEach(track => track.stop());
+        screenStream = null;
+        clearInterval(screenInterval);
+        
+        shareScreenBtn.innerText = '📺 مشاركة الشاشة';
+        shareScreenBtn.style.borderColor = "";
+        shareScreenBtn.style.color = "white";
+        logToChat("📺 تم إيقاف مشاركة الشاشة.");
+        return;
+    }
+
+    try {
+        // طلب إذن مشاركة الشاشة
+        screenStream = await navigator.mediaDevices.getDisplayMedia({ 
+            video: { cursor: "always", frameRate: 1 } 
+        });
+        screenVideo.srcObject = screenStream;
+        await screenVideo.play();
+
+        // دقة منخفضة لتسريع النقل وتقليل استهلاك الباندويث
+        screenCanvas.width = 640; 
+        screenCanvas.height = 360;
+
+        shareScreenBtn.innerText = '⏹️ إيقاف المشاركة';
+        shareScreenBtn.style.borderColor = "#ffaa00";
+        shareScreenBtn.style.color = "#ffaa00";
+        logToChat("📺 بدأت مشاركة الشاشة. النظام الآن يرى شاشتك.");
+
+        // توجيه النظام صوتياً للتركيز على الشاشة
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+                clientContent: {
+                    turns: [{
+                        role: "user",
+                        parts: [{ text: "[System Note: The user has started sharing their screen. You will receive frames every 2 seconds. Look at the code on the screen and evaluate it if asked.]" }]
+                    }],
+                    turnComplete: true
+                }
+            }));
+        }
+
+        // إرسال صورة كل ثانيتين
+        screenInterval = setInterval(() => {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            
+            screenCtx.drawImage(screenVideo, 0, 0, screenCanvas.width, screenCanvas.height);
+            // ضغط الصورة بنسبة 50%
+            const dataUrl = screenCanvas.toDataURL('image/jpeg', 0.5); 
+            // إزالة الـ prefix (data:image/jpeg;base64,) لأن Gemini لا يقبله
+            const base64Data = dataUrl.split(',')[1]; 
+
+            // الإرسال المباشر بصيغة Multimodal Live API
+            ws.send(JSON.stringify({
+                realtimeInput: {
+                    mediaChunks: [{
+                        mimeType: "image/jpeg",
+                        data: base64Data
+                    }]
+                }
+            }));
+        }, 2000);
+
+    } catch (err) {
+        console.error("Screen share error:", err);
+        logToChat("❌ فشل في مشاركة الشاشة. تأكد من منح الصلاحيات.");
     }
 };

@@ -27,6 +27,7 @@
             <div id="codeViewerSection" class="code-viewer-panel">
                 <pre><code id="codeDisplay"></code></pre>
             </div>
+            
         </main>
 
         <aside id="sidebar" class="sidebar-panel">
@@ -60,6 +61,10 @@
             </div>
             
             <div class="toolbar-left">
+                <button id="shareScreenBtn" class="btn-secondary" disabled>📺 share Screen</button>
+                <video id="screen-video" style="display: none;"></video>
+                <canvas id="screen-canvas" style="display: none;"></canvas>
+                
                 <button id="startBtn" class="btn-start">🎤 Start Call</button>
                 <button id="pauseMicBtn" class="btn-secondary" disabled>⏸️ Pause Mic</button>
                 <button id="muteAiBtn" class="btn-secondary" disabled>🔇 Mute AI</button>

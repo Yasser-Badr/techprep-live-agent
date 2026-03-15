@@ -14,6 +14,8 @@ TechPrep Live Agent is a real-time, voice-first AI companion built with Go and t
 * **📊 Interview History & Scorecards:** Generates an automated scorecard highlighting bugs and architectural advice using the Gemini 2.5 Flash Text API. Scorecards are saved locally with an elegant Accordion UI to track your progress over time.
 * **🎨 Immersive UI/UX:** Zoom-like dark theme, real-time audio waveform visualizer, AI Avatar nodding animations, and full microphone/AI audio controls (Mute/Pause).
 * **🏗️ Production-Ready & CI/CD:** Built with Clean Architecture in Go, fully containerized with **Docker & Nginx**, and backed by **GitHub Actions** for automated Unit Testing and continuous integration.
+* **📺 Live Screen Sharing:** Share your screen in real-time (JPEG frames every 2 seconds). The Gemini agent receives the live video feed directly and can see & comment on any code visible on your screen instantly — no more copy-paste hassle!
+* 
 
 ---
 
@@ -74,6 +76,8 @@ While the current MVP is highly stable and feature-rich, we have designed the ar
  * ⚡ WebRTC Audio Pipeline: Transitioning from WebSockets to a true WebRTC hybrid approach (using pion/webrtc) to bypass WebSocket header overhead and achieve extreme ultra-low latency for audio packets.
  * 🌍 Polyglot Execution Sandbox: Currently, the secure sandbox natively supports Golang execution. The roadmap includes expanding this to support Python, JavaScript/Node.js, Java, and C++ dynamically using dedicated microVMs.
  * 🌳 Deep AST Repository Analysis: Upgrading the GitHub V2 fetcher to build an Abstract Syntax Tree (AST) of entire repositories for deep, cross-file architectural reviews.
+ * 🤖 AI-Powered Code Editing & File Creation (with Screen Integration):** The agent will automatically edit existing code, fix bugs, or create entirely new files based on what it sees on your shared screen or during the conversation. It will use structured JSON responses that the frontend applies instantly in a virtual workspace (with one-click download). This turns TechPrep into a true "AI Pair Programmer" during live interviews.
+
 
 ## 🤝 Contributing
 Contributions are welcome! Please fork the repository and submit a pull request for any enhancements. Ensure that your PR passes the automated GitHub Actions tests.
