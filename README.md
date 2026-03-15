@@ -62,6 +62,31 @@ The easiest way for judges and developers to run this project is using Docker. I
  5. Stop the Application:
    docker-compose down
 
+## 🚀 Google Cloud Deployment Proof (For Gemini Live Agent Challenge)
+This project is successfully deployed on **Google Cloud Run** using:
+- **Dockerfile** (multi-stage build with Go + Nginx)
+- **Artifact Registry**
+- **Cloud Build**
+- **Cloud Run** (with `--allow-unauthenticated`)
+
+### Commands used for deployment:
+```bash
+gcloud artifacts repositories create techprep-live-agent \
+  --repository-format=docker \
+  --location=europe-west1
+
+gcloud builds submit --tag europe-west1-docker.pkg.dev/techprep-live-agent-490318/techprep-live-agent/techprep-live-agent:latest .
+
+gcloud run deploy techprep-live-agent \
+  --image europe-west1-docker.pkg.dev/techprep-live-agent-490318/techprep-live-agent/techprep-live-agent:latest \
+  --port 8080 \
+  --allow-unauthenticated \
+  --region europe-west1 \
+  --set-env-vars GEMINI_API_KEY=your_key_here
+
+## Live URL: https://techprep-live-agent-845282597852.europe-west1.run.app/
+The app is running live on Google Cloud Run right now.
+
 ## 🎮 How to Use (Demo Flow)
  1. Choose Your Setup: Select a predefined Persona (e.g., Senior Tech Lead) OR choose "Custom Job" and paste a real Job Description.
  2. Start Call: Click Start Call and grant microphone permissions.
