@@ -15,7 +15,7 @@ TechPrep Live Agent is a real-time, voice-first AI companion built with Go and t
 * **🎨 Immersive UI/UX:** Zoom-like dark theme, real-time audio waveform visualizer, AI Avatar nodding animations, and full microphone/AI audio controls (Mute/Pause).
 * **🏗️ Production-Ready & CI/CD:** Built with Clean Architecture in Go, fully containerized with **Docker & Nginx**, and backed by **GitHub Actions** for automated Unit Testing and continuous integration.
 * **📺 Live Screen Sharing:** Share your screen in real-time (JPEG frames every 2 seconds). The Gemini agent receives the live video feed directly and can see & comment on any code visible on your screen instantly — no more copy-paste hassle!
-* 
+
 
 ---
 
@@ -83,6 +83,7 @@ gcloud run deploy techprep-live-agent \
   --allow-unauthenticated \
   --region europe-west1 \
   --set-env-vars GEMINI_API_KEY=your_key_here
+```
 
 ## Live URL: https://techprep-live-agent-845282597852.europe-west1.run.app/
 The app is running live on Google Cloud Run right now.
