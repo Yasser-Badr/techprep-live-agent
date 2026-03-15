@@ -93,7 +93,7 @@ function resetUI() {
     waveform.classList.remove('active');
     clearTimeout(avatarAnimationTimeout);
 
-     // إيقاف مشاركة الشاشة إذا كانت تعمل
+     //Turn off screen sharing if it's working
     if (typeof screenStream !== 'undefined' && screenStream !== null) {
         screenStream.getTracks().forEach(track => track.stop());
         screenStream = null;
@@ -459,7 +459,7 @@ runCodeBtn.onclick = async () => {
     }
 };
 
-// === ميزة مشاركة الشاشة (Screen Sharing) ===
+// === Screen sharing feature(Screen Sharing) ===
 const shareScreenBtn = document.getElementById('shareScreenBtn');
 const screenVideo = document.getElementById('screen-video');
 const screenCanvas = document.getElementById('screen-canvas');
@@ -469,37 +469,37 @@ let screenStream = null;
 let screenInterval = null;
 
 shareScreenBtn.onclick = async () => {
-    // إذا كانت الشاشة قيد المشاركة، قم بإيقافها
+    // If screen sharing is in progress, turn it off
     if (screenStream) {
         screenStream.getTracks().forEach(track => track.stop());
         screenStream = null;
         clearInterval(screenInterval);
         
-        shareScreenBtn.innerText = '📺 مشاركة الشاشة';
+        shareScreenBtn.innerText = '📺 Screen sharing';
         shareScreenBtn.style.borderColor = "";
         shareScreenBtn.style.color = "white";
-        logToChat("📺 تم إيقاف مشاركة الشاشة.");
+        logToChat("📺 Screen sharing is turned off.");
         return;
     }
 
     try {
-        // طلب إذن مشاركة الشاشة
+        // Request screen sharing permission
         screenStream = await navigator.mediaDevices.getDisplayMedia({ 
             video: { cursor: "always", frameRate: 1 } 
         });
         screenVideo.srcObject = screenStream;
         await screenVideo.play();
 
-        // دقة منخفضة لتسريع النقل وتقليل استهلاك الباندويث
+        //Low resolution to speed up transmission and reduce bandwidth consumption
         screenCanvas.width = 640; 
         screenCanvas.height = 360;
 
-        shareScreenBtn.innerText = '⏹️ إيقاف المشاركة';
+        shareScreenBtn.innerText = '⏹️ Stop sharing';
         shareScreenBtn.style.borderColor = "#ffaa00";
         shareScreenBtn.style.color = "#ffaa00";
-        logToChat("📺 بدأت مشاركة الشاشة. النظام الآن يرى شاشتك.");
+        logToChat("📺 Screen sharing has started. The system now sees your screen.");
 
-        // توجيه النظام صوتياً للتركيز على الشاشة
+        // Voice-directing the system to focus on the screen
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({
                 clientContent: {
@@ -512,17 +512,17 @@ shareScreenBtn.onclick = async () => {
             }));
         }
 
-        // إرسال صورة كل ثانيتين
+        // Sending a photo every two seconds
         screenInterval = setInterval(() => {
             if (!ws || ws.readyState !== WebSocket.OPEN) return;
             
             screenCtx.drawImage(screenVideo, 0, 0, screenCanvas.width, screenCanvas.height);
-            // ضغط الصورة بنسبة 50%
+            // Compress image by 50%
             const dataUrl = screenCanvas.toDataURL('image/jpeg', 0.5); 
-            // إزالة الـ prefix (data:image/jpeg;base64,) لأن Gemini لا يقبله
+            // Removed the prefix (data:image/jpeg;base64,) because Gemini does not accept it
             const base64Data = dataUrl.split(',')[1]; 
 
-            // الإرسال المباشر بصيغة Multimodal Live API
+            // Live transmission in Multimodal Live API format
             ws.send(JSON.stringify({
                 realtimeInput: {
                     mediaChunks: [{
@@ -535,6 +535,6 @@ shareScreenBtn.onclick = async () => {
 
     } catch (err) {
         console.error("Screen share error:", err);
-        logToChat("❌ فشل في مشاركة الشاشة. تأكد من منح الصلاحيات.");
+        logToChat("❌Failed to share screen. Make sure you grant permissions.");
     }
 };

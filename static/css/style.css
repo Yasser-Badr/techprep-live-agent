@@ -199,29 +199,76 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; max-width: 2
 
 /* --- Mobile Responsiveness --- */
 @media screen and (max-width: 768px) {
-    .bottom-toolbar { height: auto; flex-direction: column; padding: 15px; gap: 15px; }
+    body {
+        overflow-y: auto; 
+        overflow-x: hidden;
+    }
+    
+    .app-container {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .main-content {
+        flex: none; 
+        height: 50vh; 
+        min-height: 350px;
+    }
+    
+    .code-viewer-panel {
+        z-index: 10;
+    }
+
+    .bottom-toolbar { 
+        height: auto; 
+        flex-direction: column; 
+        padding: 15px; 
+        gap: 15px; 
+    }
     
     .persona-container { margin-right: 0 !important; width: 100%; }
     .persona-dropdown { width: 100%; padding: 12px; font-size: 16px; }
 
-    /* A 2x2 grid of buttons on the mobile phone for an elegant look*/
+    /* Adjusting the button network*/
     .toolbar-left {
         width: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
     }
+    #stopBtn {
+        grid-column: span 2;
+    }
     
     .toolbar-center { width: 100%; }
-    .upload-controls { flex-direction: column; width: 100%; }
+    
+    .upload-controls { 
+        flex-direction: column; 
+        width: 100%; 
+        gap: 10px; 
+    }
+    
     input[type="text"] { width: 100%; }
     
-    button { width: 100%; padding: 15px; font-size: 15px; }
+    button { 
+        width: 100%; 
+        padding: 12px; 
+        font-size: 15px; 
+    }
 
-    .sidebar-panel { position: relative; width: 100%; height: 250px; border-left: none; border-top: 1px solid var(--panel-border); margin-bottom: 0; }
+    .sidebar-panel { 
+        position: relative; 
+        width: 100%; 
+        height: 250px; 
+        border-left: none; 
+        border-top: 1px solid var(--panel-border); 
+        margin-bottom: 0; 
+    }
+    
     .ai-avatar { font-size: 60px; padding: 15px; }
     .avatar-pulse { width: 110px; height: 110px; }
 }
+
 
   /* History Modal Styles
    ========================================= */
