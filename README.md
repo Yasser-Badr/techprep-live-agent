@@ -63,6 +63,7 @@ The easiest way for judges and developers to run this project is using Docker. I
    docker-compose down
 
 ## 🚀 Google Cloud Deployment Proof (For Gemini Live Agent Challenge)
+![Cloud Run](assets/cloud.png)
 This project is successfully deployed on **Google Cloud Run** using:
 - **Dockerfile** (multi-stage build with Go + Nginx)
 - **Artifact Registry**
